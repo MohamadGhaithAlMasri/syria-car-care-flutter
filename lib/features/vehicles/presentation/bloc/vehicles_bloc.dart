@@ -5,6 +5,7 @@ import '../../domain/usecases/get_vehicles.dart';
 import '../../domain/usecases/add_vehicle.dart';
 import '../../domain/usecases/delete_vehicle.dart';
 import '../../domain/usecases/update_vehicle.dart';
+import '../../domain/usecases/upload_vehicle_image.dart';
 import '../../../../core/usecases/usecase.dart';
 
 part 'vehicles_event.dart';
@@ -15,12 +16,14 @@ class VehiclesBloc extends Bloc<VehiclesEvent, VehiclesState> {
   final AddVehicle addVehicle;
   final DeleteVehicle deleteVehicle;
   final UpdateVehicle updateVehicle;
+  final UploadVehicleImage uploadVehicleImage;
 
   VehiclesBloc({
     required this.getVehicles,
     required this.addVehicle,
     required this.deleteVehicle,
     required this.updateVehicle,
+    required this.uploadVehicleImage,
   }) : super(VehiclesInitial()) {
     on<LoadVehiclesEvent>((event, emit) async {
       emit(VehiclesLoading());
@@ -55,6 +58,15 @@ class VehiclesBloc extends Bloc<VehiclesEvent, VehiclesState> {
       result.fold(
         (failure) => emit(VehiclesError(failure.message)),
         (success) => add(LoadVehiclesEvent()),
+      );
+    });
+
+    on<UploadVehicleImageEvent>((event, emit) async {
+      emit(VehiclesLoading());
+      final result = await uploadVehicleImage(event.file, event.fileName);
+      result.fold(
+        (failure) => emit(VehiclesError(failure.message)),
+        (imageUrl) => emit(VehicleImageUploaded(imageUrl)),
       );
     });
   }

@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import '../bloc/vehicles_bloc.dart';
 import '../../domain/entities/vehicle.dart';
 
@@ -17,6 +19,23 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   final _yearController = TextEditingController();
   final _colorController = TextEditingController();
   final _plateController = TextEditingController();
+  
+  File? _image;
+  String? _uploadedImageUrl;
+  final _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+      // Start upload immediately or wait until "Add" button is pressed?
+      // User said "upload when I pick it" implied by "add the image I upload".
+      // But usually it's better to upload on "Add" button.
+      // Let's upload when "Add" button is pressed for better UX control.
+    }
+  }
 
   @override
   void dispose() {
@@ -30,18 +49,30 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return BlocListener<VehiclesBloc, VehiclesState>(
       listener: (context, state) {
-        if (state is VehiclesLoaded) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('add_car_success'.tr())));
+        if (state is VehicleImageUploaded) {
+          _uploadedImageUrl = state.imageUrl;
+          // After image is uploaded, proceed to add vehicle
+          final vehicle = Vehicle(
+            id: '',
+            brand: _brandController.text,
+            model: _modelController.text,
+            year: _yearController.text,
+            color: _colorController.text,
+            plateNumber: _plateController.text,
+            imageUrl: _uploadedImageUrl,
+          );
+          context.read<VehiclesBloc>().add(AddVehicleEvent(vehicle));
+        } else if (state is VehiclesLoaded) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('add_car_success'.tr())),
+          );
           Navigator.pop(context);
         } else if (state is VehiclesError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
         }
       },
       child: Scaffold(
@@ -52,58 +83,63 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
             icon: const Icon(Icons.arrow_back, size: 20),
             onPressed: () => Navigator.pop(context),
           ),
-          automaticallyImplyLeading: false,
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
               Center(
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(30),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    children: [
-                      Stack(
-                        alignment: Alignment.bottomRight,
-                        children: [
-                          CircleAvatar(
-                            radius: 40,
-                            backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                            child: Icon(
-                              Icons.directions_car,
-                              size: 40,
-                              color: Theme.of(context).colorScheme.primary,
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(30),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Column(
+                      children: [
+                        Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                              backgroundImage: _image != null ? FileImage(_image!) : null,
+                              child: _image == null
+                                  ? Icon(
+                                      Icons.directions_car,
+                                      size: 40,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    )
+                                  : null,
                             ),
-                          ),
-                          CircleAvatar(
-                            radius: 15,
-                            backgroundColor: Theme.of(context).cardColor,
-                            child: Icon(
-                              Icons.camera_alt,
-                              size: 18,
-                              color: Theme.of(context).textTheme.bodyLarge?.color,
+                            CircleAvatar(
+                              radius: 15,
+                              backgroundColor: Theme.of(context).cardColor,
+                              child: Icon(
+                                Icons.camera_alt,
+                                size: 18,
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 15),
-                      Text(
-                        'upload_car_image'.tr(),
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                          ],
                         ),
-                      ),
-                      const Text(
-                        'تصل إلى 5 ميغابايت JPG, PNG',
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
-                      ),
-                    ],
+                        const SizedBox(height: 15),
+                        Text(
+                          'upload_car_image'.tr(),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                          ),
+                        ),
+                        const Text(
+                          'تصل إلى 5 ميغابايت JPG, PNG',
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -153,7 +189,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                         children: [
                           Text(
                             'data_accuracy'.tr(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.cyanAccent,
                               fontWeight: FontWeight.bold,
                             ),
@@ -161,7 +197,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                           Text(
                             'data_accuracy_desc'.tr(),
                             textAlign: TextAlign.right,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 11,
                             ),
@@ -169,8 +205,8 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(width: 12),
-                    Icon(Icons.info_outline, color: Colors.cyanAccent),
+                    const SizedBox(width: 12),
+                    const Icon(Icons.info_outline, color: Colors.cyanAccent),
                   ],
                 ),
               ),
@@ -183,33 +219,43 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                     child: ElevatedButton(
                       onPressed: state is VehiclesLoading
                           ? null
-                          : () {
-                              final vehicle = Vehicle(
-                                id: '',
-                                brand: _brandController.text,
-                                model: _modelController.text,
-                                year: _yearController.text,
-                                color: _colorController.text,
-                                plateNumber: _plateController.text,
-                              );
-                              context.read<VehiclesBloc>().add(
-                                AddVehicleEvent(vehicle),
-                              );
+                          : () async {
+                              if (_image != null) {
+                                // First upload the image
+                                final bytes = await _image!.readAsBytes();
+                                context.read<VehiclesBloc>().add(
+                                      UploadVehicleImageEvent(
+                                        bytes,
+                                        _image!.path.split('/').last,
+                                      ),
+                                    );
+                              } else {
+                                // Add without image
+                                final vehicle = Vehicle(
+                                  id: '',
+                                  brand: _brandController.text,
+                                  model: _modelController.text,
+                                  year: _yearController.text,
+                                  color: _colorController.text,
+                                  plateNumber: _plateController.text,
+                                );
+                                context.read<VehiclesBloc>().add(AddVehicleEvent(vehicle));
+                              }
                             },
                       child: state is VehiclesLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.check_circle,
                                   color: Colors.white,
                                   size: 20,
                                 ),
-                                SizedBox(width: 10),
+                                const SizedBox(width: 10),
                                 Text(
                                   'add_car'.tr(),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,

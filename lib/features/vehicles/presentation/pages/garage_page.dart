@@ -22,7 +22,6 @@ class _GarageScreenState extends State<GarageScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return BlocListener<VehiclesBloc, VehiclesState>(
       listener: (context, state) {
         if (state is VehiclesError) {
@@ -63,7 +62,9 @@ class _GarageScreenState extends State<GarageScreen> {
 
               Text(
                 'my_garage'.tr(),
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 32),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontSize: 32),
               ),
               const SizedBox(
                 height: 5,
@@ -102,7 +103,7 @@ class _GarageScreenState extends State<GarageScreen> {
                           return _buildCarCard(
                             context,
                             vehicle,
-                            "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1000",
+                            vehicle.imageUrl ?? "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1000",
                           );
                         },
                       );
@@ -180,9 +181,10 @@ class _GarageScreenState extends State<GarageScreen> {
           ),
           child: Column(
             children: [
-
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(25),
+                ),
                 child: Image.network(
                   imageUrl,
                   height: 150,
@@ -197,14 +199,15 @@ class _GarageScreenState extends State<GarageScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(15),
                           ),
                           child: Text(
@@ -212,7 +215,9 @@ class _GarageScreenState extends State<GarageScreen> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
-                              color: Theme.of(context).textTheme.bodyLarge?.color,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
                             ),
                           ),
                         ),
@@ -225,7 +230,9 @@ class _GarageScreenState extends State<GarageScreen> {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodyLarge?.color,
                               ),
                             ),
                             Text(
@@ -247,7 +254,9 @@ class _GarageScreenState extends State<GarageScreen> {
                           child: _actionButton(
                             "delete".tr(),
                             Icons.delete_outline,
-                            Theme.of(context).colorScheme.error.withOpacity(0.1),
+                            Theme.of(
+                              context,
+                            ).colorScheme.error.withOpacity(0.1),
                             Theme.of(context).colorScheme.error,
                             () => _showDeleteConfirmation(context, vehicle),
                           ),
@@ -257,12 +266,15 @@ class _GarageScreenState extends State<GarageScreen> {
                           child: _actionButton(
                             "edit".tr(),
                             Icons.edit_outlined,
-                            Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                            Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.1),
                             Theme.of(context).colorScheme.primary,
                             () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => EditVehicleScreen(vehicle: vehicle),
+                                builder: (context) =>
+                                    EditVehicleScreen(vehicle: vehicle),
                               ),
                             ),
                           ),

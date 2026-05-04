@@ -20,7 +20,7 @@
   "logout": "Logout",
   "welcome": "Welcome to Syria Car Care",
   "skip": "Skip",
-  "good_morning": "Good Morning, Mohammad",
+  "good_morning": "Good Morning",
   "care_quote": "Let's take care of your car like new today",
   "active": "Active",
   "current_subscription": "Current Subscription",
@@ -184,5 +184,15 @@
   "syriatel_cash": "Syriatel Cash",
   "syriatel_cash_subtitle": "Instant and secure payment",
   "bank_transfer": "Bank Transfer",
-  "bank_transfer_subtitle": "Authorized local banks"
+  "bank_transfer_subtitle": "Authorized local banks",
+  "recharge_amount": "Recharge Amount",
+  "enter_recharge_amount": "Enter amount to recharge",
+  "amount": "Amount",
+  "please_enter_amount": "Please enter amount",
+  "please_enter_valid_amount": "Please enter a valid amount",
+  "recharge_confirmation": "Recharge Confirmation",
+  "recharge_success": "Balance recharged successfully",
+  "confirm_recharge_msg": "Are you sure you want to recharge your balance with the following amount?",
+  "payment_method": "Payment Method",
+  "no_transactions": "No previous transactions"
 }

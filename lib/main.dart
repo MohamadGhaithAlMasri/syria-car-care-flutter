@@ -15,7 +15,6 @@ import 'package:syria_car_care2/core/theme/theme_bloc.dart';
 import 'package:syria_car_care2/core/theme/app_theme.dart';
 
 void main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
 
   await EasyLocalization.ensureInitialized();
@@ -28,7 +27,6 @@ void main() async {
   await di.init();
 
   runApp(
-
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('ar')],
       path: 'assets/translations',
@@ -45,7 +43,6 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-
       providers: [
         BlocProvider(create: (context) => ThemeBloc()..add(LoadThemeEvent())),
         BlocProvider(create: (context) => di.sl<AuthBloc>()),

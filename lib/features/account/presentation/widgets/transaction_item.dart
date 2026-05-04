@@ -6,6 +6,7 @@ class TransactionItem extends StatelessWidget {
   final String amount;
   final Color amountColor;
   final IconData icon;
+  final Color? borderColor;
   final bool isHighlighted;
 
   const TransactionItem({
@@ -16,26 +17,32 @@ class TransactionItem extends StatelessWidget {
     required this.amountColor,
     required this.icon,
     this.isHighlighted = false,
+    this.borderColor,
   });
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: isHighlighted
-            ? Border.all(color: Colors.cyanAccent, width: 1)
-            : null,
+        border: borderColor != null
+            ? Border.all(color: borderColor!, width: 1.5)
+            : (isHighlighted
+                  ? Border.all(color: Colors.cyanAccent, width: 1)
+                  : null),
       ),
       child: Row(
         children: [
           CircleAvatar(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            child: Icon(icon, color: Theme.of(context).textTheme.bodyLarge?.color, size: 20),
+            child: Icon(
+              icon,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 15),
           Column(

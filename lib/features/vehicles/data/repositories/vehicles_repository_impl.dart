@@ -31,6 +31,7 @@ class VehiclesRepositoryImpl implements VehiclesRepository {
           year: vehicle.year,
           plateNumber: vehicle.plateNumber,
           color: vehicle.color,
+          imageUrl: vehicle.imageUrl,
         ),
       );
       return const Right(null);
@@ -60,9 +61,20 @@ class VehiclesRepositoryImpl implements VehiclesRepository {
           year: vehicle.year,
           plateNumber: vehicle.plateNumber,
           color: vehicle.color,
+          imageUrl: vehicle.imageUrl,
         ),
       );
       return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> uploadVehicleImage(dynamic file, String fileName) async {
+    try {
+      final imageUrl = await remoteDataSource.uploadVehicleImage(file, fileName);
+      return Right(imageUrl);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

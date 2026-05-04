@@ -2,7 +2,11 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<UserModel> signUpWithEmailPassword(String email, String password, String name);
+  Future<UserModel> signUpWithEmailPassword(
+    String email,
+    String password,
+    String name,
+  );
   Future<UserModel> signInWithEmailPassword(String email, String password);
 }
 
@@ -12,18 +16,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl(this.supabaseClient);
 
   @override
-  Future<UserModel> signUpWithEmailPassword(String email, String password, String name) async {
+  Future<UserModel> signUpWithEmailPassword(
+    String email,
+    String password,
+    String name,
+  ) async {
     try {
       final response = await supabaseClient.auth.signUp(
         email: email,
         password: password,
-        data: {'name': name},
+        data: {'full_name': name},
       );
 
       if (response.user != null) {
-
         if (response.session == null) {
-          throw Exception('الرجاء التحقق من بريدك الإلكتروني لتفعيل الحساب (تأكيد الإيميل مطلوب في Supabase)');
+          throw Exception(
+            'الرجاء التحقق من بريدك الإلكتروني لتفعيل الحساب (تأكيد الإيميل مطلوب في Supabase)',
+          );
         }
         return UserModel(email: response.user!.email ?? email);
       } else {
@@ -35,7 +44,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> signInWithEmailPassword(String email, String password) async {
+  Future<UserModel> signInWithEmailPassword(
+    String email,
+    String password,
+  ) async {
     try {
       final response = await supabaseClient.auth.signInWithPassword(
         email: email,

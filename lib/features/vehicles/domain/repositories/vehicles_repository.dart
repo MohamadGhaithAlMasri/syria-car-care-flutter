@@ -7,4 +7,5 @@ abstract class VehiclesRepository {
   Future<Either<Failure, void>> addVehicle(Vehicle vehicle);
   Future<Either<Failure, void>> deleteVehicle(String vehicleId);
   Future<Either<Failure, void>> updateVehicle(Vehicle vehicle);
+  Future<Either<Failure, String>> uploadVehicleImage(dynamic file, String fileName);
 }

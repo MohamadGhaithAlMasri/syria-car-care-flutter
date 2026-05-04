@@ -13,7 +13,6 @@ class NavigationBarView extends StatefulWidget {
 }
 
 class _NavigationBarViewState extends State<NavigationBarView> {
-
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
@@ -24,38 +23,47 @@ class _NavigationBarViewState extends State<NavigationBarView> {
   ];
 
   @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: _pages[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+      bottomNavigationBar: Builder(
+        builder: (innerContext) {
+          return BottomNavigationBar(
+            currentIndex: _currentIndex,
 
-        onTap: (index) => setState(() {
-          _currentIndex = index;
-        }),
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.cyan,
-        unselectedItemColor: Colors.blueGrey.shade200,
+            onTap: (index) => setState(() {
+              _currentIndex = index;
+            }),
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: Colors.cyan,
+            unselectedItemColor: Colors.blueGrey.shade200,
 
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home_filled),
-            label: 'home'.tr(),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.directions_car_filled_outlined),
-            label: 'garage'.tr(),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.account_balance_wallet_outlined),
-            label: 'wallet'.tr(),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person_outline),
-            label: 'profile'.tr(),
-          ),
-        ],
+            items: [
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.home_filled),
+                label: 'home'.tr(context: innerContext),
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.directions_car_filled_outlined),
+                label: 'garage'.tr(context: innerContext),
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.account_balance_wallet_outlined),
+                label: 'wallet'.tr(context: innerContext),
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.person_outline),
+                label: 'profile'.tr(context: innerContext),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

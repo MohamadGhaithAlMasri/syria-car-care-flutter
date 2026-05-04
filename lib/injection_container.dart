@@ -23,12 +23,20 @@ import 'features/services/domain/usecases/load_services.dart';
 import 'features/vehicles/domain/usecases/add_vehicle.dart';
 import 'features/vehicles/domain/usecases/delete_vehicle.dart';
 import 'features/vehicles/domain/usecases/update_vehicle.dart';
+import 'features/vehicles/domain/usecases/upload_vehicle_image.dart';
 
 import 'features/services/data/datasources/bookings_remote_data_source.dart';
 import 'features/services/data/repositories/bookings_repository_impl.dart';
 import 'features/services/domain/repositories/bookings_repository.dart';
 import 'features/services/domain/usecases/create_booking.dart';
 import 'features/services/presentation/bloc/bookings_bloc.dart';
+
+import 'features/account/domain/usecases/get_account_info.dart';
+import 'features/account/domain/usecases/get_transactions.dart';
+import 'features/account/domain/usecases/recharge_wallet.dart';
+import 'features/account/domain/repositories/account_repository.dart';
+import 'features/account/data/repositories/account_repository_impl.dart';
+import 'features/account/data/datasources/account_remote_data_source.dart';
 
 final sl = GetIt.instance;
 
@@ -45,9 +53,14 @@ Future<void> init() async {
         addVehicle: sl(),
         deleteVehicle: sl(),
         updateVehicle: sl(),
+        uploadVehicleImage: sl(),
       ));
   sl.registerFactory(() => ServicesBloc(loadServices: sl()));
-  sl.registerFactory(() => AccountBloc());
+  sl.registerFactory(() => AccountBloc(
+        getAccountInfo: sl(),
+        getTransactions: sl(),
+        rechargeWallet: sl(),
+      ));
   sl.registerFactory(() => BookingsBloc(createBooking: sl()));
 
   sl.registerLazySingleton(() => SignUpWithEmailPassword(sl()));
@@ -56,8 +69,12 @@ Future<void> init() async {
   sl.registerLazySingleton(() => AddVehicle(sl()));
   sl.registerLazySingleton(() => DeleteVehicle(sl()));
   sl.registerLazySingleton(() => UpdateVehicle(sl()));
+  sl.registerLazySingleton(() => UploadVehicleImage(sl()));
   sl.registerLazySingleton(() => LoadServices(sl()));
   sl.registerLazySingleton(() => CreateBooking(sl()));
+  sl.registerLazySingleton(() => GetAccountInfo(sl()));
+  sl.registerLazySingleton(() => GetTransactions(sl()));
+  sl.registerLazySingleton(() => RechargeWallet(sl()));
 
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDataSource: sl()),
@@ -71,6 +88,9 @@ Future<void> init() async {
   sl.registerLazySingleton<BookingsRepository>(
     () => BookingsRepositoryImpl(remoteDataSource: sl()),
   );
+  sl.registerLazySingleton<AccountRepository>(
+    () => AccountRepositoryImpl(remoteDataSource: sl()),
+  );
 
   sl.registerLazySingleton<AuthRemoteDataSource>(
     () => AuthRemoteDataSourceImpl(sl()),
@@ -83,5 +103,8 @@ Future<void> init() async {
   );
   sl.registerLazySingleton<BookingsRemoteDataSource>(
     () => BookingsRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<AccountRemoteDataSource>(
+    () => AccountRemoteDataSourceImpl(sl()),
   );
 }

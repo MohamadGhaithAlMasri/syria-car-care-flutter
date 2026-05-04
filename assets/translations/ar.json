@@ -20,7 +20,7 @@
   "logout": "تسجيل الخروج",
   "welcome": "أهلاً بك في سوريا لخدمات السيارات",
   "skip": "تخطي",
-  "good_morning": "صباح الخير، محمد",
+  "good_morning": "صباح الخير",
   "care_quote": "لنعتني بسيارتك اليوم كأنها جديدة",
   "active": "نشط",
   "current_subscription": "اشتراكك الحالي",
@@ -184,5 +184,15 @@
   "syriatel_cash": "سيريتل كاش",
   "syriatel_cash_subtitle": "دفع فوري وآمن",
   "bank_transfer": "تحويل بنكي",
-  "bank_transfer_subtitle": "بنوك محلية معتمدة"
+  "bank_transfer_subtitle": "بنوك محلية معتمدة",
+  "recharge_amount": "مبلغ الشحن",
+  "enter_recharge_amount": "أدخل المبلغ المراد شحنه",
+  "amount": "المبلغ",
+  "please_enter_amount": "يرجى إدخال المبلغ",
+  "please_enter_valid_amount": "يرجى إدخال مبلغ صحيح",
+  "recharge_confirmation": "تأكيد الشحن",
+  "recharge_success": "تم شحن الرصيد بنجاح",
+  "confirm_recharge_msg": "هل أنت متأكد من رغبتك في شحن الرصيد بالمبلغ التالي؟",
+  "payment_method": "طريقة الدفع",
+  "no_transactions": "لا يوجد عمليات سابقة"
 }

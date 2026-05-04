@@ -26,3 +26,11 @@ class VehiclesError extends VehiclesState {
   @override
   List<Object> get props => [message];
 }
+
+class VehicleImageUploaded extends VehiclesState {
+  final String imageUrl;
+  const VehicleImageUploaded(this.imageUrl);
+
+  @override
+  List<Object> get props => [imageUrl];
+}

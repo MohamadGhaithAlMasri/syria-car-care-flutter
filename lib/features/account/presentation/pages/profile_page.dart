@@ -12,11 +12,26 @@ import '../widgets/language_toggle.dart';
 import '../widgets/theme_toggle.dart';
 import '../widgets/section_title.dart';
 
-class ProfileScreen extends StatelessWidget {
+import '../bloc/account_bloc.dart';
+
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<AccountBloc>().add(GetAccountInfoEvent());
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -36,68 +51,77 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 10),
-
             Center(
-              child: Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.bottomCenter,
+              child: BlocBuilder<AccountBloc, AccountState>(
+                builder: (context, state) {
+                  String name = user?.userMetadata?['full_name'] ?? 'user'.tr();
+                  String email = user?.email ?? '';
+                  if (state is AccountLoaded) {
+                    name = state.accountInfo.name;
+                    email = state.accountInfo.email;
+                  }
+                  return Column(
                     children: [
-                      Container(
-                        width: 110,
-                        height: 110,
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.cyan, width: 2),
-                        ),
-                        child: const CircleAvatar(
-                          radius: 50,
-                          backgroundImage: NetworkImage(
-                            'https://via.placeholder.com/150',
+                      Stack(
+                        alignment: Alignment.bottomCenter,
+                        children: [
+                          Container(
+                            width: 110,
+                            height: 110,
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.cyan, width: 2),
+                            ),
+                            child: const CircleAvatar(
+                              radius: 50,
+                              backgroundImage: NetworkImage(
+                                'https://via.placeholder.com/150',
+                              ),
+                            ),
                           ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              'bronze_member'.tr(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 15),
+                      Text(
+                        name,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
-
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          'bronze_member'.tr(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      Text(
+                        email,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
                         ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 15),
-
-                  Text(
-                    'mock_user_name'.tr(),
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-                  ),
-                  Text(
-                    'mock_user_phone'.tr(),
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
             const SizedBox(height: 30),
-
             Row(
               children: [
                 BlocBuilder<VehiclesBloc, VehiclesState>(
@@ -124,13 +148,21 @@ class ProfileScreen extends StatelessWidget {
                   },
                 ),
                 const SizedBox(width: 15),
-                StatCard(
-                  title: "current_points".tr(),
-                  value: "1,250",
-                  icon: Icons.stars,
-                  bgColor: Color(0xFF1B3B5A),
-                  iconColor: Colors.cyanAccent,
-                  isDark: true,
+                BlocBuilder<AccountBloc, AccountState>(
+                  builder: (context, state) {
+                    String points = "0";
+                    if (state is AccountLoaded) {
+                      points = state.accountInfo.points.toString();
+                    }
+                    return StatCard(
+                      title: "current_points".tr(),
+                      value: points,
+                      icon: Icons.stars,
+                      bgColor: const Color(0xFF1B3B5A),
+                      iconColor: Colors.cyanAccent,
+                      isDark: true,
+                    );
+                  },
                 ),
               ],
             ),
@@ -162,7 +194,7 @@ class ProfileScreen extends StatelessWidget {
               icon: Icons.headset_mic,
               hasNavigation: false,
               isLast: true,
-              extra: Icon(
+              extra: const Icon(
                 Icons.chat_bubble_outline,
                 color: Colors.cyan,
                 size: 20,
@@ -230,11 +262,11 @@ class ProfileScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.logout, color: Colors.red),
-                    SizedBox(width: 10),
+                    const Icon(Icons.logout, color: Colors.red),
+                    const SizedBox(width: 10),
                     Text(
                       'logout'.tr(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.red,
                         fontWeight: FontWeight.bold,
                       ),

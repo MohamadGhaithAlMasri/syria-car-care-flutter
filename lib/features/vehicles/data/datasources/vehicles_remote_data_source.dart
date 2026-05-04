@@ -6,12 +6,29 @@ abstract class VehiclesRemoteDataSource {
   Future<VehicleModel> addVehicle(VehicleModel vehicle);
   Future<void> deleteVehicle(String vehicleId);
   Future<VehicleModel> updateVehicle(VehicleModel vehicle);
+  Future<String> uploadVehicleImage(dynamic file, String fileName);
 }
 
 class VehiclesRemoteDataSourceImpl implements VehiclesRemoteDataSource {
   final SupabaseClient supabaseClient;
 
   VehiclesRemoteDataSourceImpl(this.supabaseClient);
+
+  @override
+  Future<String> uploadVehicleImage(dynamic file, String fileName) async {
+    try {
+      final String path = 'vehicles/${DateTime.now().millisecondsSinceEpoch}_$fileName';
+      await supabaseClient.storage.from('vehicle_images').uploadBinary(
+            path,
+            file,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+          );
+
+      return supabaseClient.storage.from('vehicle_images').getPublicUrl(path);
+    } catch (e) {
+      rethrow;
+    }
+  }
 
   @override
   Future<List<VehicleModel>> getVehicles() async {

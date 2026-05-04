@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:syria_car_care2/features/account/presentation/bloc/account_bloc.dart';
 import 'package:syria_car_care2/features/services/presentation/bloc/bookings_bloc.dart';
 import 'package:syria_car_care2/features/services/presentation/pages/location_selection_page.dart';
 import 'package:syria_car_care2/features/account/presentation/pages/subscription_page.dart';
@@ -24,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
 
     context.read<VehiclesBloc>().add(LoadVehiclesEvent());
+    context.read<AccountBloc>().add(GetAccountInfoEvent());
   }
 
   @override
@@ -47,11 +49,21 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'good_morning'.tr(),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 24),
+            BlocBuilder<AccountBloc, AccountState>(
+              builder: (context, state) {
+                String userName = "";
+                if (state is AccountLoaded) {
+                  userName = state.accountInfo.name;
+                }
+                return Text(
+                  '${'good_morning'.tr()}${userName.isNotEmpty ? ', $userName' : ''}',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontSize: 24),
+                );
+              },
             ),
-            Text('care_quote'.tr(), style: TextStyle(color: Colors.grey)),
+            Text('care_quote'.tr(), style: const TextStyle(color: Colors.grey)),
             const SizedBox(height: 20),
 
             Container(
@@ -152,7 +164,9 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   'current_orders'.tr(),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 18),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontSize: 18),
                 ),
                 InkWell(
                   onTap: () {},
@@ -214,7 +228,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
-                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodyLarge?.color,
                               ),
                             ),
                             Text(
@@ -287,7 +303,9 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text(
                   'my_cars'.tr(),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 18),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontSize: 18),
                 ),
                 InkWell(
                   onTap: () {
@@ -356,7 +374,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       top: Radius.circular(20),
                                     ),
                                     child: Image.network(
-                                      'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1000',
+                                      vehicle.imageUrl ??
+                                          'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1000',
                                       height: 120,
                                       width: double.infinity,
                                       fit: BoxFit.cover,
@@ -381,7 +400,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                               '${vehicle.brand} ${vehicle.model}',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
-                                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                                                color: Theme.of(
+                                                  context,
+                                                ).textTheme.bodyLarge?.color,
                                               ),
                                             ),
                                             Text(

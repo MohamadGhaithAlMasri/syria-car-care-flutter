@@ -33,3 +33,13 @@ class UpdateVehicleEvent extends VehiclesEvent {
   @override
   List<Object> get props => [vehicle];
 }
+
+class UploadVehicleImageEvent extends VehiclesEvent {
+  final dynamic file;
+  final String fileName;
+
+  const UploadVehicleImageEvent(this.file, this.fileName);
+
+  @override
+  List<Object> get props => [file, fileName];
+}

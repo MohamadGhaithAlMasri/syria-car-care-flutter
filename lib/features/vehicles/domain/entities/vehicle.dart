@@ -7,6 +7,7 @@ class Vehicle extends Equatable {
   final String year;
   final String color;
   final String plateNumber;
+  final String? imageUrl;
 
   const Vehicle({
     required this.id,
@@ -15,8 +16,9 @@ class Vehicle extends Equatable {
     required this.year,
     required this.color,
     required this.plateNumber,
+    this.imageUrl,
   });
 
   @override
-  List<Object?> get props => [id, brand, model, year, color, plateNumber];
+  List<Object?> get props => [id, brand, model, year, color, plateNumber, imageUrl];
 }

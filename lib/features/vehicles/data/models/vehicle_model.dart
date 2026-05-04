@@ -8,6 +8,7 @@ class VehicleModel extends Vehicle {
     required super.year,
     required super.color,
     required super.plateNumber,
+    super.imageUrl,
   });
 
   factory VehicleModel.fromJson(Map<String, dynamic> json) {
@@ -18,6 +19,7 @@ class VehicleModel extends Vehicle {
       year: json['year']?.toString() ?? '',
       color: json['color'] ?? '',
       plateNumber: json['plate_number'] ?? '',
+      imageUrl: json['image_url'],
     );
   }
 
@@ -28,6 +30,7 @@ class VehicleModel extends Vehicle {
       'year': year,
       'color': color,
       'plate_number': plateNumber,
+      'image_url': imageUrl,
     };
     if (id.isNotEmpty) {
       map['id'] = id;

@@ -22,6 +22,7 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
   late TextEditingController _colorController;
   late TextEditingController _plateController;
   File? _imageFile;
+  String? _uploadedImageUrl;
 
   @override
   void initState() {
@@ -31,6 +32,7 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
     _yearController = TextEditingController(text: widget.vehicle.year);
     _colorController = TextEditingController(text: widget.vehicle.color);
     _plateController = TextEditingController(text: widget.vehicle.plateNumber);
+    _uploadedImageUrl = widget.vehicle.imageUrl;
   }
 
   @override
@@ -55,13 +57,28 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return BlocListener<VehiclesBloc, VehiclesState>(
       listener: (context, state) {
-        if (state is VehiclesLoaded) {
+        if (state is VehicleImageUploaded) {
+          _uploadedImageUrl = state.imageUrl;
+          // After image is uploaded, proceed to update vehicle
+          final updatedVehicle = Vehicle(
+            id: widget.vehicle.id,
+            brand: _brandController.text,
+            model: _modelController.text,
+            year: _yearController.text,
+            plateNumber: _plateController.text,
+            color: _colorController.text,
+            imageUrl: _uploadedImageUrl,
+          );
+          context.read<VehiclesBloc>().add(UpdateVehicleEvent(updatedVehicle));
+        } else if (state is VehiclesLoaded) {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('save_changes_success'.tr()), backgroundColor: Colors.green),
+            SnackBar(
+              content: Text('save_changes_success'.tr()),
+              backgroundColor: Colors.green,
+            ),
           );
         } else if (state is VehiclesError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -96,9 +113,12 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
                         image: DecorationImage(
                           image: _imageFile != null
                               ? FileImage(_imageFile!)
-                              : const NetworkImage(
-                                  'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1000',
-                                ) as ImageProvider,
+                              : (_uploadedImageUrl != null
+                                      ? NetworkImage(_uploadedImageUrl!)
+                                      : const NetworkImage(
+                                          'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1000',
+                                        ))
+                                  as ImageProvider,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -136,7 +156,7 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
                             size: 16,
                             color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),
-                          SizedBox(width: 8),
+                          const SizedBox(width: 8),
                           Text(
                             'active_vehicle'.tr(),
                             style: TextStyle(
@@ -154,7 +174,7 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
               const SizedBox(height: 40),
               Text(
                 'vehicle_info'.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.grey,
                 ),
@@ -166,7 +186,7 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
               const SizedBox(height: 20),
               Text(
                 'appearance_plate'.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.grey,
                 ),
@@ -188,7 +208,7 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
                       children: [
                         Text(
                           'clean_percentage'.tr(),
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.cyan,
                             fontWeight: FontWeight.bold,
                           ),
@@ -207,7 +227,7 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
                       alignment: Alignment.centerRight,
                       child: Text(
                         'last_wash_info'.tr(),
-                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                        style: const TextStyle(fontSize: 11, color: Colors.grey),
                       ),
                     ),
                     const SizedBox(height: 15),
@@ -232,27 +252,42 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
                     return ElevatedButton(
                       onPressed: state is VehiclesLoading
                           ? null
-                          : () {
-                              final updatedVehicle = Vehicle(
-                                id: widget.vehicle.id,
-                                brand: _brandController.text,
-                                model: _modelController.text,
-                                year: _yearController.text,
-                                plateNumber: _plateController.text,
-                                color: _colorController.text,
-                              );
-                              context.read<VehiclesBloc>().add(UpdateVehicleEvent(updatedVehicle));
+                          : () async {
+                              if (_imageFile != null) {
+                                // Upload new image first
+                                final bytes = await _imageFile!.readAsBytes();
+                                context.read<VehiclesBloc>().add(
+                                      UploadVehicleImageEvent(
+                                        bytes,
+                                        _imageFile!.path.split('/').last,
+                                      ),
+                                    );
+                              } else {
+                                // Update without new image
+                                final updatedVehicle = Vehicle(
+                                  id: widget.vehicle.id,
+                                  brand: _brandController.text,
+                                  model: _modelController.text,
+                                  year: _yearController.text,
+                                  plateNumber: _plateController.text,
+                                  color: _colorController.text,
+                                  imageUrl: _uploadedImageUrl,
+                                );
+                                context.read<VehiclesBloc>().add(
+                                      UpdateVehicleEvent(updatedVehicle),
+                                    );
+                              }
                             },
                       child: state is VehiclesLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.save, color: Colors.white, size: 20),
-                                SizedBox(width: 10),
+                                const Icon(Icons.save, color: Colors.white, size: 20),
+                                const SizedBox(width: 10),
                                 Text(
                                   'save_changes'.tr(),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -278,15 +313,15 @@ class _EditVehicleScreenState extends State<EditVehicleScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.delete_outline,
                         color: Colors.redAccent,
                         size: 20,
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Text(
                         'delete_car'.tr(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.redAccent,
                           fontWeight: FontWeight.bold,
                         ),

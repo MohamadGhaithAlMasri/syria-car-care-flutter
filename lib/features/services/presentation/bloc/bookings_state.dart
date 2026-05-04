@@ -26,3 +26,11 @@ class BookingsError extends BookingsState {
   @override
   List<Object> get props => [message];
 }
+
+class BookingsLoaded extends BookingsState {
+  final List<Booking> bookings;
+  const BookingsLoaded(this.bookings);
+
+  @override
+  List<Object> get props => [bookings];
+}

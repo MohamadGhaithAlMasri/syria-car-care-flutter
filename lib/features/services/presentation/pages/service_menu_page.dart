@@ -7,7 +7,8 @@ import '../widgets/extra_service_item.dart';
 import '../widgets/service_stepper.dart';
 
 class ServiceMenuScreen extends StatefulWidget {
-  const ServiceMenuScreen({super.key});
+  final String vehicleId;
+  const ServiceMenuScreen({super.key, required this.vehicleId});
 
   @override
   State<ServiceMenuScreen> createState() => _ServiceMenuScreenState();
@@ -168,7 +169,9 @@ class _ServiceMenuScreenState extends State<ServiceMenuScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const ScheduleBookingScreen(),
+                    builder: (context) => ScheduleBookingScreen(
+                      vehicleId: widget.vehicleId,
+                    ),
                   ),
                 );
               },

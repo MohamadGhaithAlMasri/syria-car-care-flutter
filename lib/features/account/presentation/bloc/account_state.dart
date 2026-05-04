@@ -33,3 +33,5 @@ class AccountError extends AccountState {
 }
 
 class RechargeSuccess extends AccountState {}
+
+class UpgradePlanSuccess extends AccountState {}

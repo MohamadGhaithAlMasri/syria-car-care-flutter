@@ -6,6 +6,7 @@ class AccountInfoModel extends AccountInfo {
     required super.email,
     required super.balance,
     required super.points,
+    super.plan,
     super.lastTransactionDate,
   });
 
@@ -15,6 +16,7 @@ class AccountInfoModel extends AccountInfo {
       email: json['email'] ?? '',
       balance: (json['balance'] ?? 0).toDouble(),
       points: json['points'] ?? 0,
+      plan: json['plan'],
       lastTransactionDate: json['last_transaction_at'] != null
           ? DateTime.parse(json['last_transaction_at'])
           : null,
@@ -27,6 +29,7 @@ class AccountInfoModel extends AccountInfo {
       'email': email,
       'balance': balance,
       'points': points,
+      'plan': plan,
       'last_transaction_at': lastTransactionDate?.toIso8601String(),
     };
   }

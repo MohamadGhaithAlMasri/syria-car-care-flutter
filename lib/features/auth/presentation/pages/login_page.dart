@@ -15,7 +15,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -23,7 +22,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -31,12 +29,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return BlocListener<AuthBloc, AuthState>(
-
       listener: (context, state) async {
         if (state is AuthSuccess) {
-
           final prefs = await SharedPreferences.getInstance();
           await prefs.setBool('isLoggedIn', true);
 
@@ -47,7 +42,6 @@ class _LoginScreenState extends State<LoginScreen> {
             MaterialPageRoute(builder: (context) => const NavigationBarView()),
           );
         } else if (state is AuthError) {
-
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(state.message)));
@@ -100,13 +94,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   Text(
                     'email'.tr(),
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                     decoration: const InputDecoration(
                       hintText: 'example@email.com',
                       prefixIcon: Icon(
@@ -120,13 +119,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   Text(
                     'password'.tr(),
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
-                    style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                     decoration: InputDecoration(
                       hintText: '••••••••',
                       prefixIcon: const Icon(
@@ -146,9 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           });
                         },
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 15,
-                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 15),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -174,7 +176,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: state is AuthLoading
                               ? null
                               : () {
-
                                   if (_emailController.text.isNotEmpty &&
                                       _passwordController.text.isNotEmpty) {
                                     context.read<AuthBloc>().add(

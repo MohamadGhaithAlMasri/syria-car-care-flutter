@@ -5,6 +5,8 @@ import 'package:syria_car_care2/features/account/presentation/bloc/account_bloc.
 import 'package:syria_car_care2/features/services/presentation/bloc/bookings_bloc.dart';
 import 'package:syria_car_care2/features/services/presentation/pages/location_selection_page.dart';
 import 'package:syria_car_care2/features/account/presentation/pages/subscription_page.dart';
+import 'package:syria_car_care2/features/services/presentation/pages/my_bookings_page.dart';
+import 'package:syria_car_care2/features/vehicles/domain/entities/vehicle.dart';
 import 'package:syria_car_care2/features/vehicles/presentation/pages/add_vehicle_page.dart';
 import 'package:syria_car_care2/features/vehicles/presentation/pages/edit_vehicle_page.dart';
 import 'package:syria_car_care2/features/services/presentation/pages/schedule_page.dart';
@@ -26,6 +28,57 @@ class _HomeScreenState extends State<HomeScreen> {
 
     context.read<VehiclesBloc>().add(LoadVehiclesEvent());
     context.read<AccountBloc>().add(GetAccountInfoEvent());
+    context.read<BookingsBloc>().add(GetMyBookingsEvent());
+  }
+
+  void _showVehicleSelection(
+    BuildContext context,
+    List<Vehicle> vehicles, {
+    bool isScheduling = false,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'select_car'.tr(),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: vehicles.length,
+                itemBuilder: (context, index) {
+                  final vehicle = vehicles[index];
+                  return ListTile(
+                    title: Text('${vehicle.brand} ${vehicle.model}'),
+                    subtitle: Text(vehicle.plateNumber),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => isScheduling
+                              ? ScheduleBookingScreen(vehicleId: vehicle.id)
+                              : LocationSelectionScreen(vehicleId: vehicle.id),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -66,96 +119,133 @@ class _HomeScreenState extends State<HomeScreen> {
             Text('care_quote'.tr(), style: const TextStyle(color: Colors.grey)),
             const SizedBox(height: 20),
 
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary,
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white10,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          'active'.tr(),
-                          style: TextStyle(
-                            color: Colors.cyanAccent,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
+            BlocBuilder<AccountBloc, AccountState>(
+              builder: (context, state) {
+                bool hasPlan = false;
+                String planName = 'no_plan'.tr();
+                if (state is AccountLoaded &&
+                    state.accountInfo.plan != null &&
+                    state.accountInfo.plan!.isNotEmpty) {
+                  hasPlan = true;
+                  planName = state.accountInfo.plan!;
+                }
 
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                return Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: hasPlan
+                        ? Theme.of(context).colorScheme.secondary
+                        : Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color:
+                          Theme.of(
+                            context,
+                          ).floatingActionButtonTheme.backgroundColor ??
+                          Theme.of(context).colorScheme.primary,
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            'current_subscription'.tr(),
-                            style: TextStyle(
-                              color: Colors.cyanAccent,
-                              fontSize: 12,
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: hasPlan
+                                  ? Colors.white10
+                                  : Colors.red.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              hasPlan ? 'active'.tr() : 'not_subscribed'.tr(),
+                              style: TextStyle(
+                                color: hasPlan ? Colors.cyanAccent : Colors.red,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                          Text(
-                            'active_package'.tr(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'current_subscription'.tr(),
+                                style: TextStyle(
+                                  color: hasPlan
+                                      ? Colors.cyanAccent
+                                      : Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(
+                                planName,
+                                style: TextStyle(
+                                  color: hasPlan
+                                      ? Colors.white
+                                      : Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge?.color,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
+                      const SizedBox(height: 15),
+                      LinearProgressIndicator(
+                        value: hasPlan ? 0.6 : 0.0,
+                        backgroundColor: hasPlan
+                            ? Colors.white10
+                            : Colors.grey.withOpacity(0.1),
+                        color: hasPlan ? Colors.cyanAccent : Colors.grey,
+                        minHeight: 8,
+                      ),
+                      const SizedBox(height: 15),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const SubscriptionPlansScreen(),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: hasPlan
+                                ? Colors.cyan
+                                : Theme.of(context).primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            hasPlan
+                                ? 'upgrade_package'.tr()
+                                : 'subscribe_now'.tr(),
+                            style: TextStyle(
+                              color: hasPlan
+                                  ? const Color(0xFF1B3B5A)
+                                  : Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 15),
-
-                  const LinearProgressIndicator(
-                    value: 0.6,
-                    backgroundColor: Colors.white10,
-                    color: Colors.cyanAccent,
-                    minHeight: 8,
-                  ),
-                  const SizedBox(height: 15),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const SubscriptionPlansScreen(),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.cyan,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        'upgrade_package'.tr(),
-                        style: TextStyle(
-                          color: Color(0xFF1B3B5A),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
             const SizedBox(height: 25),
 
@@ -169,7 +259,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   ).textTheme.titleLarge?.copyWith(fontSize: 18),
                 ),
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MyBookingsScreen(),
+                      ),
+                    );
+                  },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -191,80 +288,105 @@ class _HomeScreenState extends State<HomeScreen> {
 
             BlocBuilder<BookingsBloc, BookingsState>(
               builder: (context, state) {
-                return Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(25),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
-                        blurRadius: 10,
+                if (state is BookingsLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is BookingsLoaded) {
+                  if (state.bookings.isEmpty) {
+                    return Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(25),
                       ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.cyan.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: const Icon(
-                          Icons.timer_outlined,
-                          color: Colors.cyan,
-                        ),
-                      ),
-                      const SizedBox(width: 15),
-
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'غسيل بريميوم - كيا ريو',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Theme.of(
-                                  context,
-                                ).textTheme.bodyLarge?.color,
-                              ),
-                            ),
-                            Text(
-                              'الموعد: اليوم، الساعة ٠٤:٠٠ م',
-                              style: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-
-                      TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LiveTrackingScreen(),
-                            ),
-                          );
-                        },
+                      child: Center(
                         child: Text(
-                          'track'.tr(),
-                          style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyLarge?.color,
-                            fontWeight: FontWeight.bold,
+                          'no_orders_yet'.tr(),
+                          style: const TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                    );
+                  }
+                  final booking = state.bookings.first;
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 10,
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.cyan.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: const Icon(
+                            Icons.timer_outlined,
+                            color: Colors.cyan,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                booking.status == 'pending'
+                                    ? 'جاري المعالجة'
+                                    : 'طلب مكتمل',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Theme.of(
+                                    context,
+                                  ).textTheme.bodyLarge?.color,
+                                ),
+                              ),
+                              Text(
+                                '${'approx_total'.tr()}: ${booking.totalPrice} ل.س',
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    LiveTrackingScreen(booking: booking),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'track'.tr(),
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return const SizedBox();
               },
             ),
             const SizedBox(height: 25),
@@ -275,24 +397,59 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.calendar_month,
                   title: "schedule_later".tr(),
                   bgColor: Colors.teal,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ScheduleBookingScreen(),
-                    ),
-                  ),
+                  onTap: () {
+                    final vehicleState = context.read<VehiclesBloc>().state;
+                    if (vehicleState is VehiclesLoaded) {
+                      if (vehicleState.vehicles.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('please_add_car_first'.tr())),
+                        );
+                      } else if (vehicleState.vehicles.length == 1) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ScheduleBookingScreen(
+                              vehicleId: vehicleState.vehicles.first.id,
+                            ),
+                          ),
+                        );
+                      } else {
+                        // إظهار قائمة الاختيار وتمرير الصفحة المستهدفة كـ ScheduleBookingScreen
+                        _showVehicleSelection(
+                          context,
+                          vehicleState.vehicles,
+                          isScheduling: true,
+                        );
+                      }
+                    }
+                  },
                 ),
                 const SizedBox(width: 15),
                 QuickActionCard(
                   icon: Icons.water_drop,
                   title: "wash_now".tr(),
                   bgColor: Colors.blue.shade100,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LocationSelectionScreen(),
-                    ),
-                  ),
+                  onTap: () {
+                    final vehicleState = context.read<VehiclesBloc>().state;
+                    if (vehicleState is VehiclesLoaded) {
+                      if (vehicleState.vehicles.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('please_add_car_first'.tr())),
+                        );
+                      } else if (vehicleState.vehicles.length == 1) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LocationSelectionScreen(
+                              vehicleId: vehicleState.vehicles.first.id,
+                            ),
+                          ),
+                        );
+                      } else {
+                        _showVehicleSelection(context, vehicleState.vehicles);
+                      }
+                    }
+                  },
                 ),
               ],
             ),

@@ -5,6 +5,7 @@ import '../../domain/entities/wallet_transaction.dart';
 import '../../domain/usecases/get_account_info.dart';
 import '../../domain/usecases/get_transactions.dart';
 import '../../domain/usecases/recharge_wallet.dart';
+import '../../domain/usecases/upgrade_plan.dart';
 
 part 'account_event.dart';
 part 'account_state.dart';
@@ -13,15 +14,18 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
   final GetAccountInfo getAccountInfo;
   final GetTransactions getTransactions;
   final RechargeWallet rechargeWallet;
+  final UpgradePlan upgradePlan;
 
   AccountBloc({
     required this.getAccountInfo,
     required this.getTransactions,
     required this.rechargeWallet,
+    required this.upgradePlan,
   }) : super(AccountInitial()) {
     on<GetAccountInfoEvent>(_onGetAccountInfo);
     on<GetTransactionsEvent>(_onGetTransactions);
     on<RechargeWalletEvent>(_onRechargeWallet);
+    on<UpgradePlanEvent>(_onUpgradePlan);
   }
 
   Future<void> _onGetAccountInfo(
@@ -74,6 +78,22 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       (failure) => emit(AccountError(failure.message)),
       (_) {
         emit(RechargeSuccess());
+        add(GetAccountInfoEvent()); // Refresh data after success
+      },
+    );
+  }
+
+  Future<void> _onUpgradePlan(
+    UpgradePlanEvent event,
+    Emitter<AccountState> emit,
+  ) async {
+    emit(AccountLoading());
+    final result = await upgradePlan(event.planName, event.price);
+
+    result.fold(
+      (failure) => emit(AccountError(failure.message)),
+      (_) {
+        emit(UpgradePlanSuccess());
         add(GetAccountInfoEvent()); // Refresh data after success
       },
     );

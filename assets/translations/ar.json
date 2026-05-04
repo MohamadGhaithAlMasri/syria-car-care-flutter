@@ -194,5 +194,12 @@
   "recharge_success": "تم شحن الرصيد بنجاح",
   "confirm_recharge_msg": "هل أنت متأكد من رغبتك في شحن الرصيد بالمبلغ التالي؟",
   "payment_method": "طريقة الدفع",
-  "no_transactions": "لا يوجد عمليات سابقة"
+  "no_transactions": "لا يوجد عمليات سابقة",
+  "no_plan": "لا يوجد باقة",
+  "not_subscribed": "غير مشترك",
+  "insufficient_balance": "الرصيد غير كافٍ، يرجى شحن المحفظة أولاً",
+  "upgrade_success": "تمت ترقية الباقة بنجاح",
+  "current_plan": "الباقة الحالية",
+  "upgrade_confirm_msg": "هل أنت متأكد من رغبتك في الاشتراك بـ {} مقابل {} ل.س؟",
+  "no_orders_yet": "لا يوجد طلبات حالية"
 }

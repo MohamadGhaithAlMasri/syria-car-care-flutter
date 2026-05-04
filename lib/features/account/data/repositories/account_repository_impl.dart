@@ -39,4 +39,14 @@ class AccountRepositoryImpl implements AccountRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Unit>> upgradePlan(String planName, double price) async {
+    try {
+      await remoteDataSource.upgradePlan(planName, price);
+      return const Right(unit);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }

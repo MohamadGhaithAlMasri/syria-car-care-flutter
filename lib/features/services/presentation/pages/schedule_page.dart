@@ -6,7 +6,8 @@ import '../../domain/entities/booking.dart';
 import 'tracking_report_page.dart';
 
 class ScheduleBookingScreen extends StatefulWidget {
-  const ScheduleBookingScreen({super.key});
+  final String vehicleId;
+  const ScheduleBookingScreen({super.key, required this.vehicleId});
 
   @override
   State<ScheduleBookingScreen> createState() => _ScheduleBookingScreenState();
@@ -409,7 +410,7 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                       : () {
                           final booking = Booking(
                             id: '',
-                            vehicleId: '776d6c2a-9e7b-4b2a-8c9e-7b4b2a8c9e7b',
+                            vehicleId: widget.vehicleId,
                             serviceId: 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d',
                             scheduledAt: _isImmediate
                                 ? null

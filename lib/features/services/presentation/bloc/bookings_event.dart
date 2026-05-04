@@ -14,3 +14,5 @@ class CreateBookingEvent extends BookingsEvent {
   @override
   List<Object> get props => [booking];
 }
+
+class GetMyBookingsEvent extends BookingsEvent {}

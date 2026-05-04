@@ -90,7 +90,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
-                              'bronze_member'.tr(),
+                              (state is AccountLoaded &&
+                                      state.accountInfo.plan != null &&
+                                      state.accountInfo.plan!.isNotEmpty)
+                                  ? state.accountInfo.plan!
+                                  : 'not_subscribed'.tr(),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,

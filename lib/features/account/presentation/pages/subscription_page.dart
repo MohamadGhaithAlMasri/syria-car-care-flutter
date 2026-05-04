@@ -1,5 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/account_bloc.dart';
 
 class SubscriptionPlansScreen extends StatefulWidget {
   const SubscriptionPlansScreen({super.key});
@@ -10,7 +12,6 @@ class SubscriptionPlansScreen extends StatefulWidget {
 }
 
 class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
-
   final PageController _pageController = PageController(viewportFraction: 0.85);
 
   @override
@@ -28,129 +29,155 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildBadge('exclusive_for_subscribers'.tr(), context),
-                  Text(
-                    'save_with_plans'.tr(),
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-                  ),
-                  Text(
-                    'choose_level_desc'.tr(),
-                    style: TextStyle(color: Colors.grey, fontSize: 13),
-                  ),
-                ],
+      body: BlocListener<AccountBloc, AccountState>(
+        listener: (context, state) {
+          if (state is UpgradePlanSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('upgrade_success'.tr()),
+                backgroundColor: Colors.green,
               ),
-            ),
-
-            const SizedBox(height: 20),
-
-            SizedBox(
-              height: 480,
-              child: PageView(
-                controller: _pageController,
-                children: [
-
-                  _buildPlanCard(
-                    title: "silver_plan".tr(),
-                    subtitle: "silver_desc".tr(),
-                    price: "٢٠٠,٠٠٠",
-                    features: [
-                      "silver_feature_1".tr(),
-                      "silver_feature_2".tr(),
-                      "silver_feature_3".tr(),
-                    ],
-                    icon: Icons.stars,
-                    iconColor: Colors.grey,
-                    isHighlighted: false,
-                    context: context,
-                  ),
-
-                  _buildPlanCard(
-                    title: "gold_plan".tr(),
-                    subtitle: "gold_desc".tr(),
-                    price: "٤٥٠,٠٠٠",
-                    features: [
-                      "gold_feature_1".tr(),
-                      "gold_feature_2".tr(),
-                      "gold_feature_3".tr(),
-                      "gold_feature_4".tr(),
-                    ],
-                    icon: Icons.workspace_premium,
-                    iconColor: Colors.amber,
-                    isHighlighted: true,
-                    context: context,
-                  ),
-
-                  _buildPlanCard(
-                    title: "platinum_plan".tr(),
-                    subtitle: "platinum_desc".tr(),
-                    price: "٧٥٠,٠٠٠",
-                    features: [
-                      "platinum_feature_1".tr(),
-                      "platinum_feature_2".tr(),
-                      "platinum_feature_3".tr(),
-                      "platinum_feature_4".tr(),
-                    ],
-                    icon: Icons.diamond,
-                    iconColor: Colors.blueAccent,
-                    isHighlighted: false,
-                    context: context,
-                  ),
-                ],
+            );
+          } else if (state is AccountError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message.tr()),
+                backgroundColor: Colors.red,
               ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'why_subscribe'.tr(),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Row(
-                    children: [
-                      _buildMiniFeature(
-                        "save_time".tr(),
-                        Icons.access_time_filled,
-                        Colors.blueGrey,
-                        context,
+            );
+          }
+        },
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildBadge('exclusive_for_subscribers'.tr(), context),
+                    Text(
+                      'save_with_plans'.tr(),
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
-                      const SizedBox(width: 12),
-                      _buildMiniFeature(
-                        "real_savings".tr(),
-                        Icons.account_balance_wallet,
-                        Colors.cyan,
-                        context,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  _buildQueryBar(context),
-                ],
+                    ),
+                    Text(
+                      'choose_level_desc'.tr(),
+                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              BlocBuilder<AccountBloc, AccountState>(
+                builder: (context, state) {
+                  String? currentPlan = '';
+                  if (state is AccountLoaded) {
+                    currentPlan = state.accountInfo.plan;
+                  }
+
+                  return SizedBox(
+                    height: 480,
+                    child: PageView(
+                      controller: _pageController,
+                      children: [
+                        _buildPlanCard(
+                          title: "silver_plan".tr(),
+                          subtitle: "silver_desc".tr(),
+                          price: "٢٠٠,٠٠٠",
+                          numericPrice: 200000,
+                          features: [
+                            "silver_feature_1".tr(),
+                            "silver_feature_2".tr(),
+                            "silver_feature_3".tr(),
+                          ],
+                          icon: Icons.stars,
+                          iconColor: Colors.grey,
+                          isHighlighted: false,
+                          isCurrent: currentPlan == "silver_plan".tr(),
+                          context: context,
+                        ),
+                        _buildPlanCard(
+                          title: "gold_plan".tr(),
+                          subtitle: "gold_desc".tr(),
+                          price: "٤٥٠,٠٠٠",
+                          numericPrice: 450000,
+                          features: [
+                            "gold_feature_1".tr(),
+                            "gold_feature_2".tr(),
+                            "gold_feature_3".tr(),
+                            "gold_feature_4".tr(),
+                          ],
+                          icon: Icons.workspace_premium,
+                          iconColor: Colors.amber,
+                          isHighlighted: true,
+                          isCurrent: currentPlan == "gold_plan".tr(),
+                          context: context,
+                        ),
+                        _buildPlanCard(
+                          title: "platinum_plan".tr(),
+                          subtitle: "platinum_desc".tr(),
+                          price: "٧٥٠,٠٠٠",
+                          numericPrice: 750000,
+                          features: [
+                            "platinum_feature_1".tr(),
+                            "platinum_feature_2".tr(),
+                            "platinum_feature_3".tr(),
+                            "platinum_feature_4".tr(),
+                          ],
+                          icon: Icons.diamond,
+                          iconColor: Colors.blueAccent,
+                          isHighlighted: false,
+                          isCurrent: currentPlan == "platinum_plan".tr(),
+                          context: context,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'why_subscribe'.tr(),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      children: [
+                        _buildMiniFeature(
+                          "save_time".tr(),
+                          Icons.access_time_filled,
+                          Colors.blueGrey,
+                          context,
+                        ),
+                        const SizedBox(width: 12),
+                        _buildMiniFeature(
+                          "real_savings".tr(),
+                          Icons.account_balance_wallet,
+                          Colors.cyan,
+                          context,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _buildQueryBar(context),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -160,10 +187,12 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
     required String title,
     required String subtitle,
     required String price,
+    required double numericPrice,
     required List<String> features,
     required IconData icon,
     required Color iconColor,
     bool isHighlighted = false,
+    bool isCurrent = false,
     required BuildContext context,
   }) {
     Color mainColor = isHighlighted ? const Color(0xFF0A1D2E) : Theme.of(context).cardColor;
@@ -182,7 +211,6 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
       ),
       child: Column(
         children: [
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -207,7 +235,6 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
             ],
           ),
           const SizedBox(height: 30),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -232,27 +259,29 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
             ],
           ),
           const SizedBox(height: 30),
-
-          ...features.map((f) => _planFeature(f, context)),
+          ...features.map((f) => _planFeature(f, context, color: textColor)),
           const Spacer(),
-
           SizedBox(
             width: double.infinity,
             height: 55,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: isCurrent
+                  ? null
+                  : () => _showUpgradeConfirmation(context, title, numericPrice, price),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isHighlighted
-                    ? Colors.cyanAccent
-                    : Theme.of(context).colorScheme.secondary,
+                backgroundColor: isCurrent
+                    ? Colors.grey
+                    : (isHighlighted
+                        ? Colors.cyanAccent
+                        : Theme.of(context).colorScheme.secondary),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
               child: Text(
-                'subscribe_now'.tr(),
+                isCurrent ? 'current_plan'.tr() : 'subscribe_now'.tr(),
                 style: TextStyle(
-                  color: isHighlighted ? Colors.black : Colors.white,
+                  color: (isHighlighted && !isCurrent) ? Colors.black : Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -263,7 +292,44 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
     );
   }
 
-  Widget _planFeature(String text, BuildContext context) {
+  void _showUpgradeConfirmation(
+    BuildContext context,
+    String planName,
+    double numericPrice,
+    String priceString,
+  ) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('subscribe_now'.tr()),
+        content: Text(
+          'upgrade_confirm_msg'.tr(args: [planName, priceString]),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('cancel'.tr(), style: const TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.read<AccountBloc>().add(
+                UpgradePlanEvent(planName: planName, price: numericPrice),
+              );
+              Navigator.pop(dialogContext);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text('confirm'.tr(), style: const TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _planFeature(String text, BuildContext context, {Color? color}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -271,15 +337,19 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
         children: [
           Icon(
             Icons.check_circle,
-            color: Theme.of(context).brightness == Brightness.dark ? Colors.cyanAccent : Colors.cyan,
+            color: (color == Colors.white || Theme.of(context).brightness == Brightness.dark)
+                ? Colors.cyanAccent
+                : Colors.cyan,
             size: 20,
           ),
           const SizedBox(width: 12),
-          Text(
-            text,
-            style: TextStyle(
-              color: Theme.of(context).textTheme.bodyLarge?.color,
-              fontWeight: FontWeight.w500,
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: color ?? Theme.of(context).textTheme.bodyLarge?.color,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],

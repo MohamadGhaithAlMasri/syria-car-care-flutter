@@ -20,3 +20,13 @@ class RechargeWalletEvent extends AccountEvent {
   @override
   List<Object> get props => [amount, method];
 }
+
+class UpgradePlanEvent extends AccountEvent {
+  final String planName;
+  final double price;
+
+  const UpgradePlanEvent({required this.planName, required this.price});
+
+  @override
+  List<Object> get props => [planName, price];
+}

@@ -5,6 +5,7 @@ class AccountInfo extends Equatable {
   final String email;
   final double balance;
   final int points;
+  final String? plan;
   final DateTime? lastTransactionDate;
 
   const AccountInfo({
@@ -12,9 +13,10 @@ class AccountInfo extends Equatable {
     required this.email,
     required this.balance,
     required this.points,
+    this.plan,
     this.lastTransactionDate,
   });
 
   @override
-  List<Object?> get props => [name, email, balance, points, lastTransactionDate];
+  List<Object?> get props => [name, email, balance, points, plan, lastTransactionDate];
 }

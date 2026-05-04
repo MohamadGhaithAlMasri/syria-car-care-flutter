@@ -10,7 +10,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:syria_car_care2/features/services/presentation/pages/service_menu_page.dart';
 
 class LocationSelectionScreen extends StatefulWidget {
-  const LocationSelectionScreen({super.key});
+  final String vehicleId;
+  const LocationSelectionScreen({super.key, required this.vehicleId});
 
   @override
   State<LocationSelectionScreen> createState() =>
@@ -226,7 +227,9 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 13,
-                              color: Theme.of(context).textTheme.bodyLarge?.color,
+                              color: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.color,
                             ),
                           ),
                           onTap: () {
@@ -273,7 +276,9 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).brightness == Brightness.dark ? Colors.transparent : Colors.black12,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.transparent
+                        : Colors.black12,
                     blurRadius: 20,
                   ),
                 ],
@@ -338,7 +343,8 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ServiceMenuScreen(),
+                            builder: (context) =>
+                                ServiceMenuScreen(vehicleId: widget.vehicleId),
                           ),
                         );
                       },
@@ -377,7 +383,11 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
     );
   }
 
-  Widget _buildSavedLocation(String label, IconData icon, BuildContext context) {
+  Widget _buildSavedLocation(
+    String label,
+    IconData icon,
+    BuildContext context,
+  ) {
     return Container(
       width: 100,
       padding: const EdgeInsets.symmetric(vertical: 15),

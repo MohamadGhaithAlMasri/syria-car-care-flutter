@@ -1,8 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:syria_car_care2/features/auth/presentation/pages/login_page.dart';
+import 'package:syria_car_care2/features/services/presentation/pages/my_bookings_page.dart';
 import 'package:syria_car_care2/features/vehicles/presentation/pages/garage_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syria_car_care2/features/vehicles/presentation/bloc/vehicles_bloc.dart';
@@ -11,6 +13,8 @@ import '../widgets/setting_item.dart';
 import '../widgets/language_toggle.dart';
 import '../widgets/theme_toggle.dart';
 import '../widgets/section_title.dart';
+import '../widgets/profile_avatar.dart';
+import 'saved_addresses_page.dart';
 
 import '../bloc/account_bloc.dart';
 
@@ -22,6 +26,29 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  bool _isUploading = false;
+
+  Future<void> _pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+
+    if (image != null) {
+      if (mounted) {
+        setState(() => _isUploading = true);
+        context.read<AccountBloc>().add(UploadAvatarEvent(filePath: image.path));
+        
+        // We'll reset uploading state after a delay or when state changes
+        // For simplicity, we'll wait a bit then reset, 
+        // as the Bloc will trigger a refresh anyway.
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) setState(() => _isUploading = false);
+        });
+      }
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -73,10 +100,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.cyan, width: 2),
                             ),
-                            child: const CircleAvatar(
-                              radius: 50,
-                              backgroundImage: NetworkImage(
-                                'https://via.placeholder.com/150',
+                            child: GestureDetector(
+                              onTap: _isUploading ? null : _pickAndUploadImage,
+                              child: ProfileAvatar(
+                                radius: 50,
+                                child: _isUploading
+                                    ? const CircularProgressIndicator(color: Colors.cyan)
+                                    : null,
                               ),
                             ),
                           ),
@@ -95,8 +125,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       state.accountInfo.plan!.isNotEmpty)
                                   ? state.accountInfo.plan!
                                   : 'not_subscribed'.tr(),
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.black
+                                    : Colors.white,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -183,11 +215,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
               },
             ),
-            SettingItem(title: "addresses".tr(), icon: Icons.location_on),
+            SettingItem(
+              title: "addresses".tr(),
+              icon: Icons.location_on,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SavedAddressesScreen(),
+                  ),
+                );
+              },
+            ),
             SettingItem(
               title: "booking_history".tr(),
               icon: Icons.history,
               isLast: true,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MyBookingsScreen(),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 25),
             SectionTitle(title: "support_language".tr()),

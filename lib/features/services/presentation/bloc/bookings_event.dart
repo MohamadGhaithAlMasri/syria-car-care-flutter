@@ -16,3 +16,11 @@ class CreateBookingEvent extends BookingsEvent {
 }
 
 class GetMyBookingsEvent extends BookingsEvent {}
+
+class CancelBookingEvent extends BookingsEvent {
+  final String bookingId;
+  const CancelBookingEvent(this.bookingId);
+
+  @override
+  List<Object> get props => [bookingId];
+}

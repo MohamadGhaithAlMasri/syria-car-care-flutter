@@ -30,12 +30,16 @@ import 'features/services/data/repositories/bookings_repository_impl.dart';
 import 'features/services/domain/repositories/bookings_repository.dart';
 import 'features/services/domain/usecases/create_booking.dart';
 import 'features/services/domain/usecases/get_my_bookings.dart';
+import 'features/services/domain/usecases/cancel_booking.dart';
 import 'features/services/presentation/bloc/bookings_bloc.dart';
 
 import 'features/account/domain/usecases/get_account_info.dart';
 import 'features/account/domain/usecases/get_transactions.dart';
 import 'features/account/domain/usecases/recharge_wallet.dart';
 import 'features/account/domain/usecases/upgrade_plan.dart';
+import 'features/account/domain/usecases/upload_avatar.dart';
+import 'features/account/domain/usecases/get_addresses.dart';
+import 'features/account/domain/usecases/save_address.dart';
 import 'features/account/domain/repositories/account_repository.dart';
 import 'features/account/data/repositories/account_repository_impl.dart';
 import 'features/account/data/datasources/account_remote_data_source.dart';
@@ -63,10 +67,14 @@ Future<void> init() async {
         getTransactions: sl(),
         rechargeWallet: sl(),
         upgradePlan: sl(),
+        uploadAvatar: sl(),
+        getAddresses: sl(),
+        saveAddress: sl(),
       ));
   sl.registerFactory(() => BookingsBloc(
         createBooking: sl(),
         getMyBookings: sl(),
+        cancelBooking: sl(),
       ));
 
   sl.registerLazySingleton(() => SignUpWithEmailPassword(sl()));
@@ -79,10 +87,14 @@ Future<void> init() async {
   sl.registerLazySingleton(() => LoadServices(sl()));
   sl.registerLazySingleton(() => CreateBooking(sl()));
   sl.registerLazySingleton(() => GetMyBookings(sl()));
+  sl.registerLazySingleton(() => CancelBooking(sl()));
   sl.registerLazySingleton(() => GetAccountInfo(sl()));
   sl.registerLazySingleton(() => GetTransactions(sl()));
   sl.registerLazySingleton(() => RechargeWallet(sl()));
   sl.registerLazySingleton(() => UpgradePlan(sl()));
+  sl.registerLazySingleton(() => UploadAvatar(sl()));
+  sl.registerLazySingleton(() => GetAddresses(sl()));
+  sl.registerLazySingleton(() => SaveAddress(sl()));
 
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDataSource: sl()),

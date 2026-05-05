@@ -22,6 +22,7 @@ class BookingsRepositoryImpl implements BookingsRepository {
         totalPrice: booking.totalPrice,
         latitude: booking.latitude,
         longitude: booking.longitude,
+        extraServices: booking.extraServices,
       );
       final result = await remoteDataSource.createBooking(model);
       return Right(result);
@@ -45,6 +46,16 @@ class BookingsRepositoryImpl implements BookingsRepository {
     try {
       final result = await remoteDataSource.getBookingStatus(bookingId);
       return Right(result);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> cancelBooking(String bookingId) async {
+    try {
+      await remoteDataSource.cancelBooking(bookingId);
+      return const Right(null);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }

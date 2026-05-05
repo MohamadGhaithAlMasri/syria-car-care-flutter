@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:syria_car_care2/features/services/presentation/pages/tracking_report_page.dart';
 import 'package:syria_car_care2/features/services/presentation/pages/schedule_page.dart';
 import '../widgets/service_card.dart';
@@ -8,7 +9,14 @@ import '../widgets/service_stepper.dart';
 
 class ServiceMenuScreen extends StatefulWidget {
   final String vehicleId;
-  const ServiceMenuScreen({super.key, required this.vehicleId});
+  final double latitude;
+  final double longitude;
+  const ServiceMenuScreen({
+    super.key,
+    required this.vehicleId,
+    this.latitude = 33.5138,
+    this.longitude = 36.2765,
+  });
 
   @override
   State<ServiceMenuScreen> createState() => _ServiceMenuScreenState();
@@ -19,6 +27,33 @@ class _ServiceMenuScreenState extends State<ServiceMenuScreen> {
   bool _isInteriorPolished = false;
   bool _isPremiumScented = false;
   bool _isEngineCleaned = true;
+
+  // Price Constants
+  final Map<int, double> _planPrices = {
+    0: 50000.0, // Economy
+    1: 85000.0, // Full
+    2: 120000.0, // Winter
+  };
+
+  final double _polishPrice = 15000.0;
+  final double _scentPrice = 5000.0;
+  final double _enginePrice = 25000.0;
+
+  double get _totalPrice {
+    double total = _planPrices[_selectedPlan] ?? 0.0;
+    if (_isInteriorPolished) total += _polishPrice;
+    if (_isPremiumScented) total += _scentPrice;
+    if (_isEngineCleaned) total += _enginePrice;
+    return total;
+  }
+
+  List<String> get _selectedExtras {
+    List<String> extras = [];
+    if (_isInteriorPolished) extras.add('interior_polish');
+    if (_isPremiumScented) extras.add('premium_scent');
+    if (_isEngineCleaned) extras.add('engine_clean');
+    return extras;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,6 +206,10 @@ class _ServiceMenuScreenState extends State<ServiceMenuScreen> {
                   MaterialPageRoute(
                     builder: (context) => ScheduleBookingScreen(
                       vehicleId: widget.vehicleId,
+                      latitude: widget.latitude,
+                      longitude: widget.longitude,
+                      totalPrice: _totalPrice,
+                      extraServices: _selectedExtras,
                     ),
                   ),
                 );
@@ -200,7 +239,7 @@ class _ServiceMenuScreenState extends State<ServiceMenuScreen> {
                 style: TextStyle(color: Colors.grey, fontSize: 12),
               ),
               Text(
-                'total_price_mock'.tr(),
+                '${NumberFormat('#,###').format(_totalPrice)} ل.س',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

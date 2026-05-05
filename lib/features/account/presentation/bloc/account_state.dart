@@ -14,14 +14,16 @@ class AccountLoading extends AccountState {}
 class AccountLoaded extends AccountState {
   final AccountInfo accountInfo;
   final List<WalletTransaction> transactions;
+  final List<UserAddress> addresses;
   
   const AccountLoaded({
     required this.accountInfo, 
     this.transactions = const [],
+    this.addresses = const [],
   });
 
   @override
-  List<Object> get props => [accountInfo, transactions];
+  List<Object> get props => [accountInfo, transactions, addresses];
 }
 
 class AccountError extends AccountState {

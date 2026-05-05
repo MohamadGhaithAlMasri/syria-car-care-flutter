@@ -28,6 +28,7 @@ dependencies:
   easy_localization: ^3.0.3
   image_picker: ^1.2.2
   shared_preferences: ^2.5.5
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:

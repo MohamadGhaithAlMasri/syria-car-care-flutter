@@ -10,6 +10,7 @@ class BookingModel extends Booking {
     required super.totalPrice,
     required super.latitude,
     required super.longitude,
+    super.extraServices,
   });
 
   factory BookingModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +25,9 @@ class BookingModel extends Booking {
       totalPrice: (json['total_price'] as num).toDouble(),
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
+      extraServices: json['extra_services'] != null
+          ? List<String>.from(json['extra_services'])
+          : const [],
     );
   }
 
@@ -36,6 +40,7 @@ class BookingModel extends Booking {
       'total_price': totalPrice,
       'latitude': latitude,
       'longitude': longitude,
+      'extra_services': extraServices,
     };
   }
 }

@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum TransactionType { recharge, payment }
+enum TransactionType { recharge, payment, refund, subscription, booking }
 
 class WalletTransaction extends Equatable {
   final String id;

@@ -5,6 +5,7 @@ import 'package:syria_car_care2/features/vehicles/domain/entities/vehicle.dart';
 import 'package:syria_car_care2/features/vehicles/presentation/pages/add_vehicle_page.dart';
 import 'package:syria_car_care2/features/vehicles/presentation/pages/edit_vehicle_page.dart';
 import 'package:syria_car_care2/features/vehicles/presentation/bloc/vehicles_bloc.dart';
+import 'package:syria_car_care2/features/account/presentation/widgets/profile_avatar.dart';
 
 class GarageScreen extends StatefulWidget {
   const GarageScreen({super.key});
@@ -37,12 +38,7 @@ class _GarageScreenState extends State<GarageScreen> {
           actions: const [
             Padding(
               padding: EdgeInsets.all(8.0),
-              child: CircleAvatar(
-                radius: 18,
-                backgroundImage: NetworkImage(
-                  'https://via.placeholder.com/150',
-                ),
-              ),
+              child: ProfileAvatar(),
             ),
           ],
         ),

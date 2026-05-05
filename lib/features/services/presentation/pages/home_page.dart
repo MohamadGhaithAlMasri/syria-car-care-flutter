@@ -13,6 +13,7 @@ import 'package:syria_car_care2/features/services/presentation/pages/schedule_pa
 import 'package:syria_car_care2/features/vehicles/presentation/bloc/vehicles_bloc.dart';
 import 'package:syria_car_care2/features/services/presentation/pages/tracking_report_page.dart';
 import '../widgets/quick_action_card.dart';
+import 'package:syria_car_care2/features/account/presentation/widgets/profile_avatar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -81,6 +82,32 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showCancelConfirmation(BuildContext context, String bookingId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('cancel_order_title'.tr()),
+        content: Text('cancel_order_msg'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('later'.tr()),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<BookingsBloc>().add(CancelBookingEvent(bookingId));
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'تأكيد الإلغاء',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,17 +118,30 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: const [
           Padding(
             padding: EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              backgroundImage: NetworkImage('https://via.placeholder.com/150'),
-            ),
+            child: ProfileAvatar(),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<BookingsBloc, BookingsState>(
+            listener: (context, state) {
+              if (state is BookingsLoaded) {
+                // Refresh balance when bookings change (e.g. after cancellation/refund)
+                context.read<AccountBloc>().add(GetAccountInfoEvent());
+              } else if (state is BookingsError) {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.message)),
+                );
+              }
+            },
+          ),
+        ],
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             BlocBuilder<AccountBloc, AccountState>(
               builder: (context, state) {
                 String userName = "";
@@ -151,26 +191,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: hasPlan
-                                  ? Colors.white10
-                                  : Colors.red.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              hasPlan ? 'active'.tr() : 'not_subscribed'.tr(),
-                              style: TextStyle(
-                                color: hasPlan ? Colors.cyanAccent : Colors.red,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -196,6 +216,26 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                             ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: hasPlan
+                                  ? Colors.white10
+                                  : Colors.red.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              hasPlan ? 'active'.tr() : 'not_subscribed'.tr(),
+                              style: TextStyle(
+                                color: hasPlan ? Colors.cyanAccent : Colors.red,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -291,7 +331,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (state is BookingsLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is BookingsLoaded) {
-                  if (state.bookings.isEmpty) {
+                  final currentBookings = state.bookings.where((b) => b.status == 'pending').toList();
+                  if (currentBookings.isEmpty) {
                     return Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
@@ -307,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   }
-                  final booking = state.bookings.first;
+                  final booking = currentBookings.first;
                   return Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
@@ -342,7 +383,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               Text(
                                 booking.status == 'pending'
                                     ? 'جاري المعالجة'
-                                    : 'طلب مكتمل',
+                                    : booking.status == 'cancelled'
+                                        ? 'تم الإلغاء'
+                                        : 'طلب مكتمل',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -361,7 +404,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: 5),
+                        if (booking.status == 'pending')
+                          TextButton(
+                            onPressed: () => _showCancelConfirmation(context, booking.id),
+                            child: Text(
+                              'cancel'.tr(),
+                              style: const TextStyle(
+                                color: Colors.redAccent,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        const SizedBox(width: 5),
                         TextButton(
                           onPressed: () {
                             Navigator.push(
@@ -591,6 +646,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+    ),
 
       floatingActionButton: FloatingActionButton(
         onPressed: () {},

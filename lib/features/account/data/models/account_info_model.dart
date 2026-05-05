@@ -8,6 +8,7 @@ class AccountInfoModel extends AccountInfo {
     required super.points,
     super.plan,
     super.lastTransactionDate,
+    super.avatarUrl,
   });
 
   factory AccountInfoModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +21,7 @@ class AccountInfoModel extends AccountInfo {
       lastTransactionDate: json['last_transaction_at'] != null
           ? DateTime.parse(json['last_transaction_at'])
           : null,
+      avatarUrl: json['avatar_url'],
     );
   }
 
@@ -31,6 +33,7 @@ class AccountInfoModel extends AccountInfo {
       'points': points,
       'plan': plan,
       'last_transaction_at': lastTransactionDate?.toIso8601String(),
+      'avatar_url': avatarUrl,
     };
   }
 }

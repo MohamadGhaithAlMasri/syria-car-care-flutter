@@ -21,7 +21,9 @@ class RechargeConfirmationPage extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('recharge_success'.tr())),
           );
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          // Return to Wallet screen by popping Confirmation and Amount pages
+          Navigator.of(context).pop();
+          Navigator.of(context).pop();
         } else if (state is AccountError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),

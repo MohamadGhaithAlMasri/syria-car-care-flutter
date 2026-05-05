@@ -18,7 +18,13 @@ class WalletTransactionModel extends WalletTransaction {
       date: DateTime.parse(json['created_at']),
       type: json['type'] == 'recharge' 
           ? TransactionType.recharge 
-          : TransactionType.payment,
+          : json['type'] == 'refund'
+              ? TransactionType.refund
+              : json['type'] == 'subscription'
+                  ? TransactionType.subscription
+                  : json['type'] == 'booking'
+                      ? TransactionType.booking
+                      : TransactionType.payment,
       iconName: json['icon_name'],
     );
   }
@@ -29,7 +35,15 @@ class WalletTransactionModel extends WalletTransaction {
       'title': title,
       'amount': amount,
       'created_at': date.toIso8601String(),
-      'type': type == TransactionType.recharge ? 'recharge' : 'payment',
+      'type': type == TransactionType.recharge 
+          ? 'recharge' 
+          : type == TransactionType.refund
+              ? 'refund'
+              : type == TransactionType.subscription
+                  ? 'subscription'
+                  : type == TransactionType.booking
+                      ? 'booking'
+                      : 'payment',
       'icon_name': iconName,
     };
   }

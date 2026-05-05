@@ -30,3 +30,23 @@ class UpgradePlanEvent extends AccountEvent {
   @override
   List<Object> get props => [planName, price];
 }
+
+class UploadAvatarEvent extends AccountEvent {
+  final String filePath;
+
+  const UploadAvatarEvent({required this.filePath});
+
+  @override
+  List<Object> get props => [filePath];
+}
+
+class GetAddressesEvent extends AccountEvent {}
+
+class SaveAddressEvent extends AccountEvent {
+  final UserAddress address;
+
+  const SaveAddressEvent(this.address);
+
+  @override
+  List<Object> get props => [address];
+}

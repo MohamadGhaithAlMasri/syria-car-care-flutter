@@ -62,16 +62,22 @@ class TransactionsPage extends StatelessWidget {
                   title: tx.title,
                   date: DateFormat('dd/MM/yyyy HH:mm').format(tx.date),
                   amount:
-                      "${tx.type == TransactionType.recharge ? '+' : '-'} ${tx.amount.toStringAsFixed(0)} ${'syrian_pound'.tr()}",
-                  amountColor: tx.type == TransactionType.recharge
+                      "${(tx.type == TransactionType.recharge || tx.type == TransactionType.refund) ? '+' : '-'} ${tx.amount.abs().toStringAsFixed(0)} ${'syrian_pound'.tr()}",
+                  amountColor: (tx.type == TransactionType.recharge || tx.type == TransactionType.refund)
                       ? Colors.green
                       : Colors.red,
-                  borderColor: tx.type == TransactionType.recharge
+                  borderColor: (tx.type == TransactionType.recharge || tx.type == TransactionType.refund)
                       ? Colors.green.withOpacity(0.3)
                       : Colors.red.withOpacity(0.3),
                   icon: tx.type == TransactionType.recharge
                       ? Icons.add_card
-                      : Icons.local_car_wash,
+                      : tx.type == TransactionType.refund
+                          ? Icons.history_rounded
+                          : tx.type == TransactionType.subscription
+                              ? Icons.card_membership
+                              : tx.type == TransactionType.booking
+                                  ? Icons.local_car_wash
+                                  : Icons.payment,
                 );
               },
             ),

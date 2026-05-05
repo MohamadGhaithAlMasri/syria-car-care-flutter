@@ -1,28 +1,106 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import '../../../../core/services/map_service.dart';
 import '../../domain/entities/booking.dart';
 
-class LiveTrackingScreen extends StatelessWidget {
+class LiveTrackingScreen extends StatefulWidget {
   final Booking? booking;
   const LiveTrackingScreen({super.key, this.booking});
+
+  @override
+  State<LiveTrackingScreen> createState() => _LiveTrackingScreenState();
+}
+
+class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
+  List<LatLng> _routePoints = [];
+  final LatLng _startPoint = const LatLng(33.5138, 36.2765); // ساحة الأمويين
+  late LatLng _endPoint;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _endPoint = LatLng(
+      widget.booking?.latitude ?? 33.5100,
+      widget.booking?.longitude ?? 36.2700,
+    );
+    _fetchRoute();
+  }
+
+  Future<void> _fetchRoute() async {
+    final points = await MapService.getRoute(_startPoint, _endPoint);
+    if (mounted) {
+      setState(() {
+        _routePoints = points;
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          Container(
+          // Map Background
+          SizedBox(
             width: double.infinity,
-            height: MediaQuery.of(context).size.height * 0.6,
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: NetworkImage('https://i.stack.imgur.com/HILX3.png'),
-                fit: BoxFit.cover,
-                opacity: 0.6,
+            height: MediaQuery.of(context).size.height * 0.7,
+            child: FlutterMap(
+              options: MapOptions(
+                initialCenter: LatLng(
+                  (_startPoint.latitude + _endPoint.latitude) / 2,
+                  (_startPoint.longitude + _endPoint.longitude) / 2,
+                ),
+                initialZoom: 14,
               ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.syria_car_care',
+                ),
+                if (_routePoints.isNotEmpty)
+                  PolylineLayer(
+                    polylines: [
+                      Polyline(
+                        points: _routePoints,
+                        color: Colors.cyan,
+                        strokeWidth: 5,
+                      ),
+                    ],
+                  ),
+                MarkerLayer(
+                  markers: [
+                    // Start Point (Umayyad Square)
+                    Marker(
+                      point: _startPoint,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                        size: 35,
+                      ),
+                    ),
+                    // End Point (User Location)
+                    Marker(
+                      point: _endPoint,
+                      width: 40,
+                      height: 40,
+                      child: const Icon(
+                        Icons.local_car_wash,
+                        color: Colors.cyan,
+                        size: 35,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
 
+          // Header
           Positioned(
             top: 50,
             left: 20,
@@ -33,7 +111,7 @@ class LiveTrackingScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     InkWell(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () => Navigator.of(context).popUntil((route) => route.isFirst),
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
@@ -85,6 +163,7 @@ class LiveTrackingScreen extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
+                if (!_isLoading)
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -97,14 +176,11 @@ class LiveTrackingScreen extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'PM 14:25',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Theme.of(
-                                context,
-                              ).textTheme.bodyLarge?.color,
                             ),
                           ),
                           Text(
@@ -138,41 +214,7 @@ class LiveTrackingScreen extends StatelessWidget {
             ),
           ),
 
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.local_shipping,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 5),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text(
-                    'يصل خلال ٧ دقائق',
-                    style: TextStyle(color: Colors.white, fontSize: 10),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
+          // Bottom Sheet Information
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -182,6 +224,12 @@ class LiveTrackingScreen extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(35),
                 ),
+                boxShadow: [
+                   BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 20,
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -288,7 +336,7 @@ class LiveTrackingScreen extends StatelessWidget {
                       _buildDetailBox(
                         context,
                         "رقم الطلب",
-                        booking?.id.substring(0, 8).toUpperCase() ?? "SC-TEMP",
+                        widget.booking?.id.substring(0, 8).toUpperCase() ?? "SC-TEMP",
                       ),
                       const SizedBox(width: 15),
                       _buildDetailBox(
@@ -297,6 +345,29 @@ class LiveTrackingScreen extends StatelessWidget {
                         "غسيل VIP كامل",
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 25),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.of(context).popUntil((route) => route.isFirst);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      child: Text(
+                        'العودة للرئيسية',
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -375,3 +446,4 @@ class LiveTrackingScreen extends StatelessWidget {
     );
   }
 }
+

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syria_car_care2/features/services/presentation/bloc/bookings_bloc.dart';
 
@@ -7,7 +8,18 @@ import 'tracking_report_page.dart';
 
 class ScheduleBookingScreen extends StatefulWidget {
   final String vehicleId;
-  const ScheduleBookingScreen({super.key, required this.vehicleId});
+  final double latitude;
+  final double longitude;
+  final double totalPrice;
+  final List<String> extraServices;
+  const ScheduleBookingScreen({
+    super.key,
+    required this.vehicleId,
+    this.latitude = 33.5138,
+    this.longitude = 36.2765,
+    this.totalPrice = 50000.0, // Default to Economy plan price
+    this.extraServices = const [],
+  });
 
   @override
   State<ScheduleBookingScreen> createState() => _ScheduleBookingScreenState();
@@ -416,9 +428,10 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                                 ? null
                                 : DateTime(2024, 4, _selectedDay, 14),
                             status: 'pending',
-                            totalPrice: 85000,
-                            latitude: 33.5138,
-                            longitude: 36.2765,
+                            totalPrice: widget.totalPrice,
+                            latitude: widget.latitude,
+                            longitude: widget.longitude,
+                            extraServices: widget.extraServices,
                           );
                           context.read<BookingsBloc>().add(
                             CreateBookingEvent(booking),
@@ -454,7 +467,7 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                 style: TextStyle(color: Colors.grey, fontSize: 12),
               ),
               Text(
-                '٨٥,٠٠٠ ل.س',
+                '${NumberFormat('#,###').format(widget.totalPrice)} ل.س',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

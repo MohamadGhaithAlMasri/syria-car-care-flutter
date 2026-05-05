@@ -7,6 +7,11 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:geolocator/geolocator.dart';
+import 'package:syria_car_care2/features/account/domain/entities/user_address.dart';
+import 'package:syria_car_care2/features/account/presentation/bloc/account_bloc.dart';
+import '../../../../core/services/map_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:syria_car_care2/features/services/presentation/pages/service_menu_page.dart';
 
 class LocationSelectionScreen extends StatefulWidget {
@@ -62,39 +67,19 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
 
   Future<void> _searchLocations(String query) async {
     if (query.isEmpty) {
-      setState(() {
-        _searchResults = [];
-      });
+      setState(() => _searchResults = []);
       return;
     }
 
-    setState(() {
-      _isSearching = true;
-    });
+    setState(() => _isSearching = true);
 
     try {
-      final client = HttpClient();
-
-      final url = Uri.parse(
-        'https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(query)}&format=json&limit=5&countrycodes=sy',
-      );
-      final request = await client.getUrl(url);
-      request.headers.add('User-Agent', 'syria_car_care_app');
-      final response = await request.close();
-
-      if (response.statusCode == 200) {
-        final stringData = await response.transform(utf8.decoder).join();
-        final data = json.decode(stringData);
-        setState(() {
-          _searchResults = data;
-        });
-      }
+      final results = await MapService.searchLocations(query);
+      setState(() => _searchResults = results);
     } catch (e) {
       debugPrint('Error searching: $e');
     } finally {
-      setState(() {
-        _isSearching = false;
-      });
+      setState(() => _isSearching = false);
     }
   }
 
@@ -288,7 +273,7 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'أماكني المحفوظة',
+                    "Saved locations",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -296,17 +281,49 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
                     ),
                   ),
                   const SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildSavedLocation("home_loc".tr(), Icons.home, context),
-                      _buildSavedLocation("work_loc".tr(), Icons.work, context),
-                      _buildSavedLocation(
-                        "parents_loc".tr(),
-                        Icons.people,
-                        context,
-                      ),
-                    ],
+                  BlocBuilder<AccountBloc, AccountState>(
+                    builder: (context, state) {
+                      final List<UserAddress> addresses = state is AccountLoaded
+                          ? state.addresses
+                          : [];
+
+                      final home = addresses.cast<UserAddress?>().firstWhere(
+                        (a) => a?.type == 'home',
+                        orElse: () => null,
+                      );
+                      final work = addresses.cast<UserAddress?>().firstWhere(
+                        (a) => a?.type == 'work',
+                        orElse: () => null,
+                      );
+                      final parents = addresses.cast<UserAddress?>().firstWhere(
+                        (a) => a?.type == 'parents',
+                        orElse: () => null,
+                      );
+
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _buildSavedLocation(
+                            "home_loc".tr(),
+                            Icons.home,
+                            context,
+                            home,
+                          ),
+                          _buildSavedLocation(
+                            "work_loc".tr(),
+                            Icons.work,
+                            context,
+                            work,
+                          ),
+                          _buildSavedLocation(
+                            "parents_loc".tr(),
+                            Icons.people,
+                            context,
+                            parents,
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: 25),
                   const Text(
@@ -343,8 +360,11 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                ServiceMenuScreen(vehicleId: widget.vehicleId),
+                            builder: (context) => ServiceMenuScreen(
+                              vehicleId: widget.vehicleId,
+                              latitude: _center.latitude,
+                              longitude: _center.longitude,
+                            ),
                           ),
                         );
                       },
@@ -387,27 +407,57 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
     String label,
     IconData icon,
     BuildContext context,
+    UserAddress? address,
   ) {
-    return Container(
-      width: 100,
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: Theme.of(context).textTheme.bodyLarge?.color),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
+    final bool isSet = address != null;
+
+    return GestureDetector(
+      onTap: () {
+        if (isSet) {
+          setState(() {
+            _center = LatLng(address.latitude, address.longitude);
+            _mapController.move(_center, 15);
+            _searchController.text = address.addressName;
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('address_not_set_msg'.tr(args: [label]))),
+          );
+        }
+      },
+      child: Container(
+        width: 100,
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: isSet
+              ? Border.all(color: Colors.cyan.withOpacity(0.5), width: 1)
+              : null,
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: isSet
+                  ? Colors.cyan
+                  : Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.color?.withOpacity(0.5),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSet ? FontWeight.bold : FontWeight.w500,
+                color: isSet
+                    ? Colors.cyan
+                    : Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -9,6 +9,7 @@ class Booking extends Equatable {
   final double totalPrice;
   final double latitude;
   final double longitude;
+  final List<String> extraServices;
 
   const Booking({
     required this.id,
@@ -19,6 +20,7 @@ class Booking extends Equatable {
     required this.totalPrice,
     required this.latitude,
     required this.longitude,
+    this.extraServices = const [],
   });
 
   @override
@@ -31,5 +33,6 @@ class Booking extends Equatable {
         totalPrice,
         latitude,
         longitude,
+        extraServices,
       ];
 }

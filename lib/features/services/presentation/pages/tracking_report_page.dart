@@ -68,7 +68,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const WashingReportScreen()),
+              MaterialPageRoute(builder: (context) => WashingReportScreen(booking: _currentBooking)),
             );
           });
         } else {
@@ -114,7 +114,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
         
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const WashingReportScreen()),
+          MaterialPageRoute(builder: (context) => WashingReportScreen(booking: _currentBooking)),
         );
       }
     });

@@ -1,7 +1,24 @@
 import 'package:flutter/material.dart';
+import '../../domain/entities/booking.dart';
 
-class WashingReportScreen extends StatelessWidget {
-  const WashingReportScreen({super.key});
+class WashingReportScreen extends StatefulWidget {
+  final Booking? booking;
+
+  const WashingReportScreen({super.key, this.booking});
+
+  @override
+  State<WashingReportScreen> createState() => _WashingReportScreenState();
+}
+
+class _WashingReportScreenState extends State<WashingReportScreen> {
+  int _rating = 0;
+  final TextEditingController _commentController = TextEditingController();
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,12 +144,19 @@ class WashingReportScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(5, (index) {
-                        return Icon(
-                          index == 4 ? Icons.star_border : Icons.star,
-                          color: index == 4
-                              ? Colors.grey.shade300
-                              : Colors.cyan,
-                          size: 35,
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _rating = index + 1;
+                            });
+                          },
+                          child: Icon(
+                            index >= _rating ? Icons.star_border : Icons.star,
+                            color: index >= _rating
+                                ? Colors.grey.shade300
+                                : Colors.cyan,
+                            size: 35,
+                          ),
                         );
                       }),
                     ),
@@ -149,6 +173,7 @@ class WashingReportScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     TextField(
+                      controller: _commentController,
                       maxLines: 3,
                       textAlign: TextAlign.right,
                       decoration: InputDecoration(
@@ -193,16 +218,25 @@ class WashingReportScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    _buildPaymentRow(context, 'نوع الخدمة', 'غسيل في أي بي (VIP Wash)'),
+                    _buildPaymentRow(
+                      context, 
+                      'رقم الطلب', 
+                      widget.booking?.id.substring(0, 8).toUpperCase() ?? 'SC-TEMP'
+                    ),
                     const Divider(height: 25),
                     _buildPaymentRow(
                       context,
                       'طريقة الدفع',
-                      'المحفظة الإلكترونية',
+                      'دفع إلكتروني',
                       isWallet: true,
                     ),
                     const Divider(height: 25),
-                    _buildPaymentRow(context, 'الإجمالي', '125,000 ل.س', isTotal: true),
+                    _buildPaymentRow(
+                      context, 
+                      'الإجمالي', 
+                      '${widget.booking?.totalPrice.toStringAsFixed(0) ?? '125000'} ل.س', 
+                      isTotal: true
+                    ),
                   ],
                 ),
               ),
@@ -214,8 +248,10 @@ class WashingReportScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton(
-                  onPressed: () =>
-                      Navigator.of(context).popUntil((route) => route.isFirst),
+                  onPressed: () {
+                    // Here you would normally send the _rating and _commentController.text to backend
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
                     shape: RoundedRectangleBorder(

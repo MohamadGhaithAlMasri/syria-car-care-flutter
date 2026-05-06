@@ -1,12 +1,18 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../../core/services/map_service.dart';
+import '../../../../core/services/notification_service.dart';
+import '../../../../injection_container.dart';
 import '../../domain/entities/booking.dart';
+import '../../domain/repositories/bookings_repository.dart';
+import 'washing_report_page.dart';
 
 class LiveTrackingScreen extends StatefulWidget {
   final Booking? booking;
-  const LiveTrackingScreen({super.key, this.booking});
+  final String? bookingId;
+  const LiveTrackingScreen({super.key, this.booking, this.bookingId});
 
   @override
   State<LiveTrackingScreen> createState() => _LiveTrackingScreenState();
@@ -17,15 +23,107 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
   final LatLng _startPoint = const LatLng(33.5138, 36.2765); // ساحة الأمويين
   late LatLng _endPoint;
   bool _isLoading = true;
+  int _statusIndex = 0; // 0: On the way, 1: Washing started, 2: Completed
+  Timer? _simulationTimer;
+  Booking? _currentBooking;
 
   @override
   void initState() {
     super.initState();
+    _currentBooking = widget.booking;
     _endPoint = LatLng(
-      widget.booking?.latitude ?? 33.5100,
-      widget.booking?.longitude ?? 36.2700,
+      _currentBooking?.latitude ?? 33.5100,
+      _currentBooking?.longitude ?? 36.2700,
     );
+    _initializeStatus();
     _fetchRoute();
+  }
+
+  Future<void> _initializeStatus() async {
+    final bId = _currentBooking?.id ?? widget.bookingId;
+    if (bId == null) {
+      _startSimulation();
+      return;
+    }
+
+    final result = await sl<BookingsRepository>().getBookingStatus(bId);
+    result.fold(
+      (failure) => _startSimulation(),
+      (booking) {
+        if (!mounted) return;
+        _currentBooking = booking;
+        int initialIndex = 0;
+        if (booking.status == 'washing') {
+          initialIndex = 1;
+        } else if (booking.status == 'completed') {
+          initialIndex = 2;
+        }
+        
+        setState(() {
+          _statusIndex = initialIndex;
+          _endPoint = LatLng(booking.latitude, booking.longitude);
+        });
+
+        if (initialIndex == 2) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const WashingReportScreen()),
+            );
+          });
+        } else {
+          _startSimulation();
+        }
+      },
+    );
+  }
+
+  void _startSimulation() {
+    _simulationTimer = Timer.periodic(const Duration(seconds: 10), (timer) async {
+      if (!mounted) return;
+      
+      final nextStatus = _statusIndex + 1;
+      String dbStatus = 'accepted';
+      if (nextStatus == 1) dbStatus = 'washing';
+      if (nextStatus == 2) dbStatus = 'completed';
+
+      final bId = _currentBooking?.id ?? widget.bookingId;
+      if (bId != null) {
+        await sl<BookingsRepository>().updateBookingStatus(bId, dbStatus);
+      }
+
+      setState(() {
+        _statusIndex = nextStatus;
+      });
+
+      if (_statusIndex == 1) {
+        sl<NotificationService>().showNotification(
+          id: 101,
+          title: 'بدأ الغسيل الآن',
+          body: 'فريقنا بدأ العمل على غسيل سيارتك الآن، سيتم إعلامك فور الانتهاء',
+          payload: 'tracking:$bId',
+        );
+      } else if (_statusIndex == 2) {
+        sl<NotificationService>().showNotification(
+          id: 102,
+          title: 'اكتمل الغسيل',
+          body: 'تم الانتهاء من غسيل سيارتك بنجاح! شكراً لاستخدامك سيريا كار كير',
+          payload: 'tracking:$bId',
+        );
+        _simulationTimer?.cancel();
+        
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const WashingReportScreen()),
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _simulationTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _fetchRoute() async {
@@ -241,25 +339,28 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                         context,
                         "اكتمل",
                         Icons.verified_outlined,
-                        false,
+                        _statusIndex == 2,
+                        isDone: _statusIndex > 2,
                       ),
                       _buildStatusStep(
                         context,
                         "بدأ الغسيل",
                         Icons.water_drop_outlined,
-                        false,
+                        _statusIndex == 1,
+                        isDone: _statusIndex > 1,
                       ),
                       _buildStatusStep(
                         context,
                         "في الطريق",
                         Icons.local_shipping,
-                        true,
+                        _statusIndex == 0,
+                        isDone: _statusIndex > 0,
                       ),
                       _buildStatusStep(
                         context,
                         "تم الحجز",
                         Icons.check_circle,
-                        true,
+                        false,
                         isDone: true,
                       ),
                     ],
@@ -272,14 +373,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                         Icons.phone,
                         Theme.of(context).colorScheme.primary.withOpacity(0.1),
                         Theme.of(context).textTheme.bodyLarge?.color ??
-                            Colors.black,
+                            (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
                       ),
                       const SizedBox(width: 10),
                       _buildActionBtn(
                         Icons.chat_bubble_outline,
                         Theme.of(context).colorScheme.primary.withOpacity(0.1),
                         Theme.of(context).textTheme.bodyLarge?.color ??
-                            Colors.black,
+                            (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
                       ),
                       const Spacer(),
                       Column(
@@ -388,7 +489,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     Color color = isDone
         ? Colors.cyan
         : (isActive
-              ? (Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black)
+              ? (Theme.of(context).textTheme.bodyLarge?.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black))
               : Colors.grey.shade500);
     return Column(
       children: [

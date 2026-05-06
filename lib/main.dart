@@ -13,6 +13,10 @@ import 'injection_container.dart' as di;
 import 'package:syria_car_care2/features/services/presentation/bloc/bookings_bloc.dart';
 import 'package:syria_car_care2/core/theme/theme_bloc.dart';
 import 'package:syria_car_care2/core/theme/app_theme.dart';
+import 'package:syria_car_care2/core/services/notification_service.dart';
+import 'package:syria_car_care2/features/services/presentation/pages/tracking_report_page.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +29,8 @@ void main() async {
   );
 
   await di.init();
+  await di.sl<NotificationService>().init();
+  await di.sl<NotificationService>().requestPermissions();
 
   runApp(
     EasyLocalization(
@@ -54,6 +60,7 @@ class MyApp extends StatelessWidget {
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, state) {
           return MaterialApp(
+            navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
             title: 'Syria Car Care',
             themeMode: state.themeMode,

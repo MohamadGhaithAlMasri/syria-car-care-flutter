@@ -346,7 +346,7 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
                         border: InputBorder.none,
                         hintStyle: TextStyle(
                           fontSize: 12,
-                          color: Colors.black26,
+                          color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.4),
                         ),
                       ),
                     ),

@@ -7,4 +7,5 @@ abstract class BookingsRepository {
   Future<Either<Failure, List<Booking>>> getMyBookings();
   Future<Either<Failure, Booking>> getBookingStatus(String bookingId);
   Future<Either<Failure, void>> cancelBooking(String bookingId);
+  Future<Either<Failure, void>> updateBookingStatus(String bookingId, String status);
 }

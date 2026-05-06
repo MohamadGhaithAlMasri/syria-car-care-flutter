@@ -24,3 +24,12 @@ class CancelBookingEvent extends BookingsEvent {
   @override
   List<Object> get props => [bookingId];
 }
+
+class UpdateBookingStatusEvent extends BookingsEvent {
+  final String bookingId;
+  final String status;
+  const UpdateBookingStatusEvent(this.bookingId, this.status);
+
+  @override
+  List<Object> get props => [bookingId, status];
+}

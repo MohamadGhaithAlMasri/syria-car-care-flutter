@@ -60,4 +60,17 @@ class BookingsRepositoryImpl implements BookingsRepository {
       return Left(ServerFailure(message: e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> updateBookingStatus(
+    String bookingId,
+    String status,
+  ) async {
+    try {
+      await remoteDataSource.updateBookingStatus(bookingId, status);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
 }

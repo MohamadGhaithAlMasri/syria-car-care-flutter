@@ -31,6 +31,7 @@ import 'features/services/domain/repositories/bookings_repository.dart';
 import 'features/services/domain/usecases/create_booking.dart';
 import 'features/services/domain/usecases/get_my_bookings.dart';
 import 'features/services/domain/usecases/cancel_booking.dart';
+import 'features/services/domain/usecases/update_booking_status.dart';
 import 'features/services/presentation/bloc/bookings_bloc.dart';
 
 import 'features/account/domain/usecases/get_account_info.dart';
@@ -42,6 +43,7 @@ import 'features/account/domain/usecases/get_addresses.dart';
 import 'features/account/domain/usecases/save_address.dart';
 import 'features/account/domain/repositories/account_repository.dart';
 import 'features/account/data/repositories/account_repository_impl.dart';
+import 'core/services/notification_service.dart';
 import 'features/account/data/datasources/account_remote_data_source.dart';
 
 final sl = GetIt.instance;
@@ -49,6 +51,7 @@ final sl = GetIt.instance;
 Future<void> init() async {
 
   sl.registerLazySingleton(() => Supabase.instance.client);
+  sl.registerLazySingleton(() => NotificationService());
 
   sl.registerFactory(() => AuthBloc(
         signUpWithEmailPassword: sl(),
@@ -75,6 +78,7 @@ Future<void> init() async {
         createBooking: sl(),
         getMyBookings: sl(),
         cancelBooking: sl(),
+        updateBookingStatus: sl(),
       ));
 
   sl.registerLazySingleton(() => SignUpWithEmailPassword(sl()));
@@ -88,6 +92,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => CreateBooking(sl()));
   sl.registerLazySingleton(() => GetMyBookings(sl()));
   sl.registerLazySingleton(() => CancelBooking(sl()));
+  sl.registerLazySingleton(() => UpdateBookingStatus(sl()));
   sl.registerLazySingleton(() => GetAccountInfo(sl()));
   sl.registerLazySingleton(() => GetTransactions(sl()));
   sl.registerLazySingleton(() => RechargeWallet(sl()));

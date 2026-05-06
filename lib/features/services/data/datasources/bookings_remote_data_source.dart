@@ -6,6 +6,7 @@ abstract class BookingsRemoteDataSource {
   Future<List<BookingModel>> getMyBookings();
   Future<BookingModel> getBookingStatus(String bookingId);
   Future<void> cancelBooking(String bookingId);
+  Future<void> updateBookingStatus(String bookingId, String status);
 }
 
 class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
@@ -137,5 +138,13 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
           'last_transaction_at': DateTime.now().toIso8601String(),
         })
         .eq('id', user.id);
+  }
+
+  @override
+  Future<void> updateBookingStatus(String bookingId, String status) async {
+    await supabaseClient
+        .from('bookings')
+        .update({'status': status})
+        .eq('id', bookingId);
   }
 }

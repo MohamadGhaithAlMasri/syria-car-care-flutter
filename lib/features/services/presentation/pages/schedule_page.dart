@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syria_car_care2/features/services/presentation/bloc/bookings_bloc.dart';
 
 import '../../domain/entities/booking.dart';
+import 'package:syria_car_care2/core/services/notification_service.dart';
+import 'package:syria_car_care2/injection_container.dart';
 import 'tracking_report_page.dart';
 
 class ScheduleBookingScreen extends StatefulWidget {
@@ -45,6 +47,13 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
     return BlocListener<BookingsBloc, BookingsState>(
       listener: (context, state) {
         if (state is BookingCreated) {
+          sl<NotificationService>().showNotification(
+            id: 1,
+            title: 'تم حجز الطلب بنجاح',
+            body: _isImmediate 
+                ? 'تم حجز طلبك والسائق في الطريق إليك الآن'
+                : 'تم جدولة طلبك بنجاح في الموعد المحدد',
+          );
           if (_isImmediate) {
             Navigator.pushReplacement(
               context,
@@ -97,9 +106,12 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                         color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
-                    const Text(
+                    Text(
                       'اختر الوقت المناسب لك للحصول على الخدمة',
-                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 30),
 
@@ -205,10 +217,10 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                         physics: const NeverScrollableScrollPhysics(),
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              childAspectRatio: 2.2,
-                              mainAxisSpacing: 10,
-                              crossAxisSpacing: 10,
+                                crossAxisCount: 3,
+                                childAspectRatio: 2.2,
+                                mainAxisSpacing: 10,
+                                crossAxisSpacing: 10,
                             ),
                         itemCount: _timeSlots.length,
                         itemBuilder: (context, index) {
@@ -236,8 +248,12 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                   color: isSelected
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.blueGrey,
+                                      ? (Theme.of(context).brightness == Brightness.dark 
+                                          ? Colors.black 
+                                          : Theme.of(context).primaryColor)
+                                      : (Theme.of(context).brightness == Brightness.dark 
+                                          ? Colors.grey.shade400 
+                                          : Colors.blueGrey),
                                 ),
                               ),
                             ),
@@ -270,10 +286,10 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            const Text(
+                            Text(
                               'الوقت المتوقع للوصول: ٢٥-٤٠ دقيقة',
                               style: TextStyle(
-                                color: Colors.blueGrey,
+                                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
                                 fontSize: 12,
                               ),
                               textAlign: TextAlign.center,
@@ -366,7 +382,9 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
           child: Text(
             label,
             style: TextStyle(
-              color: isDone || !isActive ? Colors.black87 : Colors.white,
+              color: (isDone || !isActive) 
+                  ? Colors.black87 
+                  : (Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white),
               fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
@@ -462,9 +480,12 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'المجموع الكلي',
-                style: TextStyle(color: Colors.grey, fontSize: 12),
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+                  fontSize: 12,
+                ),
               ),
               Text(
                 '${NumberFormat('#,###').format(widget.totalPrice)} ل.س',

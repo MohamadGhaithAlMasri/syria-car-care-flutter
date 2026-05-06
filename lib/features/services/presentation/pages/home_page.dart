@@ -331,7 +331,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (state is BookingsLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is BookingsLoaded) {
-                  final currentBookings = state.bookings.where((b) => b.status == 'pending').toList();
+                  final activeStatuses = ['pending', 'accepted', 'washing'];
+                  final currentBookings = state.bookings.where((b) => activeStatuses.contains(b.status)).toList();
                   if (currentBookings.isEmpty) {
                     return Container(
                       width: double.infinity,
@@ -389,9 +390,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
-                                  color: Theme.of(
-                                    context,
-                                  ).textTheme.bodyLarge?.color,
+                                  color: booking.status == 'washing' 
+                                      ? Colors.cyan 
+                                      : Theme.of(context).textTheme.bodyLarge?.color,
+                                ),
+                              ),
+                              Text(
+                                booking.status == 'washing' 
+                                    ? 'جاري الغسيل الآن...' 
+                                    : booking.status == 'accepted' 
+                                        ? 'السائق في الطريق' 
+                                        : 'جاري المعالجة',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
                                 ),
                               ),
                               Text(

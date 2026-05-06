@@ -34,7 +34,9 @@ class ServiceStepper extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: isDone || !isActive ? Colors.black54 : Colors.white,
+              color: (isDone || !isActive) 
+                  ? Colors.black87 
+                  : (Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white),
               fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
@@ -45,7 +47,9 @@ class ServiceStepper extends StatelessWidget {
           title,
           style: TextStyle(
             fontSize: 10,
-            color: isActive ? Theme.of(context).primaryColor : Colors.grey,
+            color: isActive 
+                ? (Theme.of(context).brightness == Brightness.dark ? Colors.cyanAccent : Theme.of(context).primaryColor) 
+                : Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
           ),
         ),
       ],

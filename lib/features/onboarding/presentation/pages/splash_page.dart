@@ -21,7 +21,6 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkAuth() async {
-
     await Future.delayed(const Duration(seconds: 2));
 
     if (!mounted) return;
@@ -33,13 +32,11 @@ class _SplashScreenState extends State<SplashScreen> {
     final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
     if (session != null || isLoggedIn) {
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const NavigationBarView()),
       );
     } else {
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const OnboardingScreen()),
@@ -64,52 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(flex: 3),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 180,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white10, width: 1),
-                  ),
-                ),
-                Transform.rotate(
-                  angle: 0.8,
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                ),
-                Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    const Icon(
-                      Icons.directions_car_filled,
-                      size: 50,
-                      color: Color(0xFF0D324D),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.cyanAccent,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.water_drop,
-                        size: 15,
-                        color: Color(0xFF0D324D),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+            Image.asset('assets/images/logo7.png', width: 150, height: 150),
             const SizedBox(height: 40),
             Text(
               'app_name'.tr().toUpperCase(),

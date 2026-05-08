@@ -1,8 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syria_car_care2/features/services/presentation/bloc/bookings_bloc.dart';
-
 import '../../domain/entities/booking.dart';
 import 'package:syria_car_care2/core/services/notification_service.dart';
 import 'package:syria_car_care2/injection_container.dart';
@@ -28,7 +27,7 @@ class ScheduleBookingScreen extends StatefulWidget {
 }
 
 class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
-  int _selectedDay = DateTime.now().day;
+  DateTime _selectedDate = DateTime.now();
   String _selectedTime = "09:00 AM";
   bool _isImmediate = true;
 
@@ -43,16 +42,15 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return BlocListener<BookingsBloc, BookingsState>(
       listener: (context, state) {
         if (state is BookingCreated) {
           sl<NotificationService>().showNotification(
             id: 1,
-            title: 'تم حجز الطلب بنجاح',
-            body: _isImmediate 
-                ? 'تم حجز طلبك والسائق في الطريق إليك الآن'
-                : 'تم جدولة طلبك بنجاح في الموعد المحدد',
+            title: 'booking_success'.tr(),
+            body: _isImmediate
+                ? 'booking_immediate_msg'.tr()
+                : 'booking_scheduled_msg'.tr(),
           );
           if (_isImmediate) {
             Navigator.pushReplacement(
@@ -64,10 +62,8 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'تم جدولة طلبك بنجاح! يمكنك تتبعه من قائمة طلباتي',
-                ),
+              SnackBar(
+                content: Text('booking_scheduled_success'.tr()),
                 backgroundColor: Colors.green,
               ),
             );
@@ -82,7 +78,7 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
       child: Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const Text('تحديد الموعد'),
+          title: Text('schedule_appointment_title'.tr()),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
@@ -99,7 +95,7 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                     _buildStepper(),
                     const SizedBox(height: 30),
                     Text(
-                      'متى تريد الخدمة؟',
+                      'when_want_service'.tr(),
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -107,9 +103,11 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                       ),
                     ),
                     Text(
-                      'اختر الوقت المناسب لك للحصول على الخدمة',
+                      'choose_time_desc'.tr(),
                       style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                        color: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.color?.withOpacity(0.6),
                         fontSize: 13,
                       ),
                     ),
@@ -119,7 +117,7 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                       children: [
                         Expanded(
                           child: _buildTypeCard(
-                            title: 'موعد لاحق',
+                            title: 'later_appointment'.tr(),
                             icon: Icons.calendar_month,
                             isSelected: !_isImmediate,
                             onTap: () => setState(() => _isImmediate = false),
@@ -128,7 +126,7 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                         const SizedBox(width: 15),
                         Expanded(
                           child: _buildTypeCard(
-                            title: 'أسرع وقت (فوراً)',
+                            title: 'asap_immediate'.tr(),
                             icon: Icons.bolt,
                             isSelected: _isImmediate,
                             onTap: () => setState(() => _isImmediate = true),
@@ -139,7 +137,10 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                     const SizedBox(height: 30),
                     if (!_isImmediate) ...[
                       Text(
-                        'أبريل 2024',
+                        DateFormat(
+                          'MMMM yyyy',
+                          context.locale.languageCode,
+                        ).format(_selectedDate),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).textTheme.bodyLarge?.color,
@@ -150,45 +151,56 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                         height: 90,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          reverse: true,
-                          itemCount: 7,
+                          reverse: context.locale.languageCode == 'ar',
+                          itemCount: 14,
                           itemBuilder: (context, index) {
-                            int day = DateTime.now().day + index;
-                            bool isSelected = _selectedDay == day;
+                            DateTime date = DateTime.now().add(
+                              Duration(days: index),
+                            );
+                            bool isSelected =
+                                _selectedDate.year == date.year &&
+                                _selectedDate.month == date.month &&
+                                _selectedDate.day == date.day;
                             return InkWell(
-                              onTap: () => setState(() => _selectedDay = day),
+                              onTap: () => setState(() => _selectedDate = date),
                               child: Container(
-                                width: 65,
-                                margin: const EdgeInsets.only(left: 12),
+                                width: 70,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                ),
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? Theme.of(context).primaryColor
                                       : Theme.of(context).cardColor,
                                   borderRadius: BorderRadius.circular(15),
-                                  boxShadow: isSelected
-                                      ? [
-                                          const BoxShadow(
-                                            color: Colors.black12,
-                                            blurRadius: 10,
-                                          ),
-                                        ]
-                                      : [],
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? Colors.transparent
+                                        : Colors.grey.withOpacity(0.1),
+                                  ),
                                 ),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      '$day',
+                                      '${date.day}',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                         color: isSelected
                                             ? Colors.white
-                                            : Theme.of(context).textTheme.bodyLarge?.color,
+                                            : Theme.of(
+                                                context,
+                                              ).textTheme.bodyLarge?.color,
                                       ),
                                     ),
                                     Text(
-                                      'اليوم',
+                                      index == 0
+                                          ? 'today'.tr()
+                                          : DateFormat(
+                                              'EEE',
+                                              context.locale.languageCode,
+                                            ).format(date),
                                       style: TextStyle(
                                         fontSize: 10,
                                         color: isSelected
@@ -205,7 +217,7 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                       ),
                       const SizedBox(height: 30),
                       Text(
-                        'الأوقات المتاحة',
+                        'available_times'.tr(),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).textTheme.bodyLarge?.color,
@@ -217,10 +229,10 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                         physics: const NeverScrollableScrollPhysics(),
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                childAspectRatio: 2.2,
-                                mainAxisSpacing: 10,
-                                crossAxisSpacing: 10,
+                              crossAxisCount: 3,
+                              childAspectRatio: 2.2,
+                              mainAxisSpacing: 10,
+                              crossAxisSpacing: 10,
                             ),
                         itemCount: _timeSlots.length,
                         itemBuilder: (context, index) {
@@ -248,12 +260,14 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                   color: isSelected
-                                      ? (Theme.of(context).brightness == Brightness.dark 
-                                          ? Colors.black 
-                                          : Theme.of(context).primaryColor)
-                                      : (Theme.of(context).brightness == Brightness.dark 
-                                          ? Colors.grey.shade400 
-                                          : Colors.blueGrey),
+                                      ? (Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.black
+                                            : Theme.of(context).primaryColor)
+                                      : (Theme.of(context).brightness ==
+                                                Brightness.dark
+                                            ? Colors.grey.shade400
+                                            : Colors.blueGrey),
                                 ),
                               ),
                             ),
@@ -279,17 +293,21 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                             ),
                             const SizedBox(height: 15),
                             Text(
-                              'سيصل فريقنا إليك في أسرع وقت ممكن',
+                              'asap_desc'.tr(),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodyLarge?.color,
                               ),
                               textAlign: TextAlign.center,
                             ),
                             Text(
-                              'الوقت المتوقع للوصول: ٢٥-٤٠ دقيقة',
+                              'eta_desc'.tr(),
                               style: TextStyle(
-                                color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.6),
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.color?.withOpacity(0.6),
                                 fontSize: 12,
                               ),
                               textAlign: TextAlign.center,
@@ -326,7 +344,9 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
               : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Theme.of(context).primaryColor : Colors.grey.shade200,
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : Colors.grey.shade200,
           ),
         ),
         child: Column(
@@ -357,11 +377,11 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _stepCircle("٣", "الموعد", true),
+        _stepCircle("٣", "step_appointment".tr(), true),
         _stepLine(isActive: true),
-        _stepCircle("٢", "الباقة", false, isDone: true),
+        _stepCircle("٢", "step_package".tr(), false, isDone: true),
         _stepLine(isActive: true),
-        _stepCircle("١", "الموقع", false, isDone: true),
+        _stepCircle("١", "step_location".tr(), false, isDone: true),
       ],
     );
   }
@@ -378,13 +398,17 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
           radius: 14,
           backgroundColor: isDone
               ? Colors.cyanAccent
-              : (isActive ? Theme.of(context).primaryColor : Colors.grey.shade300),
+              : (isActive
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey.shade300),
           child: Text(
             label,
             style: TextStyle(
-              color: (isDone || !isActive) 
-                  ? Colors.black87 
-                  : (Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white),
+              color: (isDone || !isActive)
+                  ? Colors.black87
+                  : (Theme.of(context).brightness == Brightness.dark
+                        ? Colors.black
+                        : Colors.white),
               fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
@@ -421,7 +445,9 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).brightness == Brightness.dark ? Colors.transparent : Colors.black12,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.transparent
+                : Colors.black12,
             blurRadius: 10,
           ),
         ],
@@ -438,13 +464,26 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                   onPressed: state is BookingsLoading
                       ? null
                       : () {
+                          final timeParts = _selectedTime.split(' ');
+                          final timeDigits = timeParts[0].split(':');
+                          int hour = int.parse(timeDigits[0]);
+                          int minute = int.parse(timeDigits[1]);
+                          if (timeParts[1] == 'PM' && hour != 12) hour += 12;
+                          if (timeParts[1] == 'AM' && hour == 12) hour = 0;
+
+                          final scheduledDate = DateTime(
+                            _selectedDate.year,
+                            _selectedDate.month,
+                            _selectedDate.day,
+                            hour,
+                            minute,
+                          );
+
                           final booking = Booking(
                             id: '',
                             vehicleId: widget.vehicleId,
                             serviceId: 'a1b2c3d4-e5f6-4a5b-8c9d-0e1f2a3b4c5d',
-                            scheduledAt: _isImmediate
-                                ? null
-                                : DateTime(2024, 4, _selectedDay, 14),
+                            scheduledAt: _isImmediate ? null : scheduledDate,
                             status: 'pending',
                             totalPrice: widget.totalPrice,
                             latitude: widget.latitude,
@@ -464,9 +503,9 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
-                          'تأكيد الحجز',
-                          style: TextStyle(
+                      : Text(
+                          'confirm_booking'.tr(),
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -481,9 +520,11 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'المجموع الكلي',
+                'total_sum'.tr(),
                 style: TextStyle(
-                  color: Theme.of(context).textTheme.bodySmall?.color ?? Colors.grey,
+                  color:
+                      Theme.of(context).textTheme.bodySmall?.color ??
+                      Colors.grey,
                   fontSize: 12,
                 ),
               ),

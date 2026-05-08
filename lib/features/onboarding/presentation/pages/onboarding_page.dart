@@ -53,11 +53,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       title: "onboarding_title_2".tr(),
       subtitle: "onboarding_subtitle_2".tr(),
       tag: "ELITE PRECISION",
-      extraWidget: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      extraWidget: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 10,
+        runSpacing: 10,
         children: [
           _infoCard(Icons.access_time, "instant_booking".tr()),
-          const SizedBox(width: 10),
           _infoCard(Icons.location_on, "full_coverage".tr()),
         ],
       ),
@@ -119,7 +120,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Theme.of(context).primaryColor.withOpacity(0.8)],
+                  colors: [
+                    Colors.transparent,
+                    Theme.of(context).primaryColor.withOpacity(0.8),
+                  ],
                 ),
               ),
               padding: const EdgeInsets.all(20),

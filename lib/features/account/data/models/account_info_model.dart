@@ -9,6 +9,7 @@ class AccountInfoModel extends AccountInfo {
     super.plan,
     super.lastTransactionDate,
     super.avatarUrl,
+    super.phoneNumber,
   });
 
   factory AccountInfoModel.fromJson(Map<String, dynamic> json) {
@@ -22,6 +23,7 @@ class AccountInfoModel extends AccountInfo {
           ? DateTime.parse(json['last_transaction_at'])
           : null,
       avatarUrl: json['avatar_url'],
+      phoneNumber: json['phone_number'],
     );
   }
 
@@ -34,6 +36,7 @@ class AccountInfoModel extends AccountInfo {
       'plan': plan,
       'last_transaction_at': lastTransactionDate?.toIso8601String(),
       'avatar_url': avatarUrl,
+      'phone_number': phoneNumber,
     };
   }
 }

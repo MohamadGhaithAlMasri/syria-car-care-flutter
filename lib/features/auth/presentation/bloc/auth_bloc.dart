@@ -19,7 +19,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     on<AuthSignUpWithEmailPasswordEvent>((event, emit) async {
       emit(AuthLoading());
-      final result = await signUpWithEmailPassword(event.email, event.password, event.name);
+      final result = await signUpWithEmailPassword(event.email, event.password, event.name, event.phoneNumber);
       result.fold(
         (failure) => emit(AuthError(failure.message)),
         (user) => emit(AuthSuccess(user)),

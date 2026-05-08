@@ -226,7 +226,10 @@ class _AddressPickerScreenState extends State<AddressPickerScreen> {
                           longitude: _center.longitude,
                           addressName: _searchController.text.isNotEmpty 
                               ? _searchController.text 
-                              : 'Location at ${_center.latitude.toStringAsFixed(4)}, ${_center.longitude.toStringAsFixed(4)}',
+                              : 'location_at'.tr(args: [
+                                  _center.latitude.toStringAsFixed(4),
+                                  _center.longitude.toStringAsFixed(4)
+                                ]),
                         );
                         context.read<AccountBloc>().add(SaveAddressEvent(address));
                         Navigator.pop(context);

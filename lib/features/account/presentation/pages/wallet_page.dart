@@ -1,5 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:syria_car_care2/features/account/domain/entities/wallet_transaction.dart';
 import '../widgets/balance_sub_card.dart';
 import '../widgets/payment_method_card.dart';
@@ -26,6 +28,75 @@ class _WalletPaymentsScreenState extends State<WalletPaymentsScreen> {
     context.read<AccountBloc>().add(GetAccountInfoEvent());
   }
 
+  Future<void> _launchWhatsApp() async {
+    const phoneNumber = "+963992922651";
+    final url = Uri.parse("whatsapp://send?phone=$phoneNumber");
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      final webUrl = Uri.parse("https://wa.me/$phoneNumber");
+      if (await canLaunchUrl(webUrl)) {
+        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+      }
+    }
+  }
+
+  void _showBankDetails() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(25),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'bank_transfer'.tr(),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 15),
+            _buildBankRow('اسم المصرف', 'المصرف التجاري السوري'),
+            _buildBankRow('رقم الحساب', '0101-123456-001'),
+            _buildBankRow('اسم المستفيد', 'شركة سوريا للعناية بالسيارات'),
+            const SizedBox(height: 20),
+            Text(
+              'يرجى إرسال صورة إيصال التحويل للدعم الفني لتأكيد الشحن',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBankRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.copy, size: 18, color: Colors.cyan),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: value));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('تم النسخ: $value'),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            },
+          ),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(label, style: const TextStyle(color: Colors.grey)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AccountBloc, AccountState>(
@@ -49,10 +120,7 @@ class _WalletPaymentsScreenState extends State<WalletPaymentsScreen> {
             ),
             centerTitle: true,
             actions: const [
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: ProfileAvatar(),
-              ),
+              Padding(padding: EdgeInsets.all(8.0), child: ProfileAvatar()),
             ],
           ),
           body: RefreshIndicator(
@@ -98,7 +166,8 @@ class _WalletPaymentsScreenState extends State<WalletPaymentsScreen> {
                                     )
                                   else ...[
                                     Text(
-                                      accountInfo?.balance.toStringAsFixed(0) ?? '0',
+                                      accountInfo?.balance.toStringAsFixed(0) ??
+                                          '0',
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 36,
@@ -124,7 +193,8 @@ class _WalletPaymentsScreenState extends State<WalletPaymentsScreen> {
                                       title: "loyalty_points".tr(),
                                       value: isLoading && accountInfo == null
                                           ? '...'
-                                          : accountInfo?.points.toString() ?? '0',
+                                          : accountInfo?.points.toString() ??
+                                                '0',
                                     ),
                                   ),
                                   const SizedBox(width: 15),
@@ -133,10 +203,15 @@ class _WalletPaymentsScreenState extends State<WalletPaymentsScreen> {
                                       title: "last_transaction".tr(),
                                       value: isLoading && accountInfo == null
                                           ? '...'
-                                          : (accountInfo?.lastTransactionDate != null
-                                              ? DateFormat('dd/MM/yyyy').format(
-                                                  accountInfo!.lastTransactionDate!)
-                                              : '---'),
+                                          : (accountInfo?.lastTransactionDate !=
+                                                    null
+                                                ? DateFormat(
+                                                    'dd/MM/yyyy',
+                                                  ).format(
+                                                    accountInfo!
+                                                        .lastTransactionDate!,
+                                                  )
+                                                : '---'),
                                     ),
                                   ),
                                 ],
@@ -159,8 +234,9 @@ class _WalletPaymentsScreenState extends State<WalletPaymentsScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    RechargeAmountPage(method: 'syriatel_cash'.tr()),
+                                builder: (context) => RechargeAmountPage(
+                                  method: 'syriatel_cash'.tr(),
+                                ),
                               ),
                             );
                           },
@@ -172,10 +248,13 @@ class _WalletPaymentsScreenState extends State<WalletPaymentsScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        PaymentMethodCard(
-                          title: "bank_transfer".tr(),
-                          subtitle: "bank_transfer_subtitle".tr(),
-                          icon: Icons.account_balance,
+                        GestureDetector(
+                          onTap: _showBankDetails,
+                          child: PaymentMethodCard(
+                            title: "bank_transfer".tr(),
+                            subtitle: "bank_transfer_subtitle".tr(),
+                            icon: Icons.account_balance,
+                          ),
                         ),
                         const SizedBox(height: 30),
                         Row(
@@ -186,7 +265,9 @@ class _WalletPaymentsScreenState extends State<WalletPaymentsScreen> {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodyLarge?.color,
                               ),
                             ),
                             TextButton(
@@ -194,7 +275,8 @@ class _WalletPaymentsScreenState extends State<WalletPaymentsScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const TransactionsPage(),
+                                    builder: (context) =>
+                                        const TransactionsPage(),
                                   ),
                                 );
                               },
@@ -215,27 +297,35 @@ class _WalletPaymentsScreenState extends State<WalletPaymentsScreen> {
                         else if (transactions.isEmpty)
                           Center(child: Text('no_transactions'.tr()))
                         else
-                          ...transactions.take(3).map(
+                          ...transactions
+                              .take(3)
+                              .map(
                                 (tx) => TransactionItem(
                                   title: tx.title,
-                                  date: DateFormat('dd/MM/yyyy HH:mm').format(tx.date),
+                                  date: DateFormat(
+                                    'dd/MM/yyyy HH:mm',
+                                  ).format(tx.date),
                                   amount:
                                       "${(tx.type == TransactionType.recharge || tx.type == TransactionType.refund) ? '+' : '-'} ${tx.amount.abs().toStringAsFixed(0)} ${'syrian_pound'.tr()}",
-                                  amountColor: (tx.type == TransactionType.recharge || tx.type == TransactionType.refund)
+                                  amountColor:
+                                      (tx.type == TransactionType.recharge ||
+                                          tx.type == TransactionType.refund)
                                       ? Colors.green
                                       : Colors.red,
-                                  borderColor: (tx.type == TransactionType.recharge || tx.type == TransactionType.refund)
+                                  borderColor:
+                                      (tx.type == TransactionType.recharge ||
+                                          tx.type == TransactionType.refund)
                                       ? Colors.green.withOpacity(0.3)
                                       : Colors.red.withOpacity(0.3),
                                   icon: tx.type == TransactionType.recharge
                                       ? Icons.add_card
                                       : tx.type == TransactionType.refund
-                                          ? Icons.history_rounded
-                                          : tx.type == TransactionType.subscription
-                                              ? Icons.card_membership
-                                              : tx.type == TransactionType.booking
-                                                  ? Icons.local_car_wash
-                                                  : Icons.payment,
+                                      ? Icons.history_rounded
+                                      : tx.type == TransactionType.subscription
+                                      ? Icons.card_membership
+                                      : tx.type == TransactionType.booking
+                                      ? Icons.local_car_wash
+                                      : Icons.payment,
                                 ),
                               ),
                         const SizedBox(height: 20),
@@ -276,7 +366,7 @@ class _WalletPaymentsScreenState extends State<WalletPaymentsScreen> {
                         ),
                         const SizedBox(width: 15),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: _launchWhatsApp,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.cyan,
                             shape: RoundedRectangleBorder(

@@ -12,7 +12,6 @@ import 'package:syria_car_care2/features/vehicles/presentation/pages/edit_vehicl
 import 'package:syria_car_care2/features/services/presentation/pages/schedule_page.dart';
 import 'package:syria_car_care2/features/vehicles/presentation/bloc/vehicles_bloc.dart';
 import 'package:syria_car_care2/features/services/presentation/pages/tracking_report_page.dart';
-import '../widgets/quick_action_card.dart';
 import 'package:syria_car_care2/features/account/presentation/widgets/profile_avatar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -107,6 +106,29 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  void _handleOrderWash() {
+    final vehicleState = context.read<VehiclesBloc>().state;
+    if (vehicleState is VehiclesLoaded) {
+      if (vehicleState.vehicles.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('please_add_car_first'.tr())),
+        );
+      } else if (vehicleState.vehicles.length == 1) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LocationSelectionScreen(
+              vehicleId: vehicleState.vehicles.first.id,
+            ),
+          ),
+        );
+      } else {
+        _showVehicleSelection(context, vehicleState.vehicles);
+      }
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -383,10 +405,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Text(
                                 booking.status == 'pending'
-                                    ? 'جاري المعالجة'
+                                    ? 'status_pending'.tr()
                                     : booking.status == 'cancelled'
-                                        ? 'تم الإلغاء'
-                                        : 'طلب مكتمل',
+                                        ? 'status_cancelled'.tr()
+                                        : 'status_completed_order'.tr(),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
@@ -397,10 +419,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               Text(
                                 booking.status == 'washing' 
-                                    ? 'جاري الغسيل الآن...' 
+                                    ? 'status_washing_now'.tr() 
                                     : booking.status == 'accepted' 
-                                        ? 'السائق في الطريق' 
-                                        : 'جاري المعالجة',
+                                        ? 'status_driver_on_way'.tr() 
+                                        : 'status_pending'.tr(),
                                 style: const TextStyle(
                                   fontSize: 11,
                                   color: Colors.grey,
@@ -430,14 +452,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         const SizedBox(width: 5),
                         TextButton(
-                          onPressed: () {
-                            Navigator.push(
+                          onPressed: () async {
+                            await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
                                     LiveTrackingScreen(booking: booking),
                               ),
                             );
+                            if (context.mounted) {
+                              context.read<BookingsBloc>().add(GetMyBookingsEvent());
+                            }
                           },
                           child: Text(
                             'track'.tr(),
@@ -458,67 +483,49 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 25),
 
-            Row(
-              children: [
-                QuickActionCard(
-                  icon: Icons.calendar_month,
-                  title: "schedule_later".tr(),
-                  bgColor: Colors.teal,
-                  onTap: () {
-                    final vehicleState = context.read<VehiclesBloc>().state;
-                    if (vehicleState is VehiclesLoaded) {
-                      if (vehicleState.vehicles.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('please_add_car_first'.tr())),
-                        );
-                      } else if (vehicleState.vehicles.length == 1) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ScheduleBookingScreen(
-                              vehicleId: vehicleState.vehicles.first.id,
-                            ),
-                          ),
-                        );
-                      } else {
-                        // إظهار قائمة الاختيار وتمرير الصفحة المستهدفة كـ ScheduleBookingScreen
-                        _showVehicleSelection(
-                          context,
-                          vehicleState.vehicles,
-                          isScheduling: true,
-                        );
-                      }
-                    }
-                  },
+            InkWell(
+              onTap: _handleOrderWash,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(25),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).primaryColor,
+                      Theme.of(context).primaryColor.withAlpha(200),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(25),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).primaryColor.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 15),
-                QuickActionCard(
-                  icon: Icons.water_drop,
-                  title: "wash_now".tr(),
-                  bgColor: Colors.blue.shade100,
-                  onTap: () {
-                    final vehicleState = context.read<VehiclesBloc>().state;
-                    if (vehicleState is VehiclesLoaded) {
-                      if (vehicleState.vehicles.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('please_add_car_first'.tr())),
-                        );
-                      } else if (vehicleState.vehicles.length == 1) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => LocationSelectionScreen(
-                              vehicleId: vehicleState.vehicles.first.id,
-                            ),
-                          ),
-                        );
-                      } else {
-                        _showVehicleSelection(context, vehicleState.vehicles);
-                      }
-                    }
-                  },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.water_drop_rounded,
+                      color: Colors.white,
+                      size: 35,
+                    ),
+                    const SizedBox(width: 15),
+                    Text(
+                      "wash_now".tr(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
             const SizedBox(height: 25),
 
@@ -661,8 +668,8 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.add),
+        onPressed: _handleOrderWash,
+        child: const Icon(Icons.water_drop_rounded),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
     );

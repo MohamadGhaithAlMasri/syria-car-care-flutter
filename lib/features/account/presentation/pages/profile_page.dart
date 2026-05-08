@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:syria_car_care2/features/auth/presentation/pages/login_page.dart';
 import 'package:syria_car_care2/features/services/presentation/pages/my_bookings_page.dart';
 import 'package:syria_car_care2/features/vehicles/presentation/pages/garage_page.dart';
@@ -38,10 +39,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (image != null) {
       if (mounted) {
         setState(() => _isUploading = true);
-        context.read<AccountBloc>().add(UploadAvatarEvent(filePath: image.path));
-        
+        context.read<AccountBloc>().add(
+          UploadAvatarEvent(filePath: image.path),
+        );
+
         // We'll reset uploading state after a delay or when state changes
-        // For simplicity, we'll wait a bit then reset, 
+        // For simplicity, we'll wait a bit then reset,
         // as the Bloc will trigger a refresh anyway.
         Future.delayed(const Duration(seconds: 3), () {
           if (mounted) setState(() => _isUploading = false);
@@ -49,6 +52,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     }
   }
+
+  Future<void> _launchWhatsApp() async {
+    const phoneNumber = "+963992922651";
+    final url = Uri.parse("whatsapp://send?phone=$phoneNumber");
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      final webUrl = Uri.parse("https://wa.me/$phoneNumber");
+      if (await canLaunchUrl(webUrl)) {
+        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Could not launch WhatsApp")),
+          );
+        }
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -83,9 +106,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 builder: (context, state) {
                   String name = user?.userMetadata?['full_name'] ?? 'user'.tr();
                   String email = user?.email ?? '';
+                  String? phoneNumber;
                   if (state is AccountLoaded) {
                     name = state.accountInfo.name;
                     email = state.accountInfo.email;
+                    phoneNumber = state.accountInfo.phoneNumber;
                   }
                   return Column(
                     children: [
@@ -105,7 +130,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: ProfileAvatar(
                                 radius: 50,
                                 child: _isUploading
-                                    ? const CircularProgressIndicator(color: Colors.cyan)
+                                    ? const CircularProgressIndicator(
+                                        color: Colors.cyan,
+                                      )
                                     : null,
                               ),
                             ),
@@ -126,7 +153,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ? state.accountInfo.plan!
                                   : 'not_subscribed'.tr(),
                               style: TextStyle(
-                                color: Theme.of(context).brightness == Brightness.dark
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
                                     ? Colors.black
                                     : Colors.white,
                                 fontSize: 10,
@@ -152,6 +181,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           fontSize: 14,
                         ),
                       ),
+                      if (phoneNumber != null && phoneNumber.isNotEmpty) ...[
+                        const SizedBox(height: 5),
+                        Text(
+                          phoneNumber,
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ],
                   );
                 },
@@ -249,6 +288,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: Icons.headset_mic,
               hasNavigation: false,
               isLast: true,
+              onTap: _launchWhatsApp,
               extra: const Icon(
                 Icons.chat_bubble_outline,
                 color: Colors.cyan,

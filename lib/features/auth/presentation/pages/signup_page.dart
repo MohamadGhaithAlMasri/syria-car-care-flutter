@@ -16,6 +16,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
@@ -26,6 +27,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -33,11 +35,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) async {
         if (state is AuthSuccess) {
-
           final prefs = await SharedPreferences.getInstance();
           await prefs.setBool('isLoggedIn', true);
 
@@ -60,7 +60,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 10),
                   IconButton(
                     icon: Icon(
                       Icons.arrow_back,
@@ -68,20 +67,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  const SizedBox(height: 10),
+
                   Center(
-                    child: Container(
-                      width: 70,
-                      height: 70,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Icon(
-                        Icons.directions_car,
-                        color: Colors.cyanAccent,
-                        size: 35,
-                      ),
+                    child: Image.asset(
+                      'assets/images/logo7.png',
+                      width: 120,
+                      height: 120,
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -98,7 +89,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   const SizedBox(height: 30),
                   Text(
                     'full_name'.tr(),
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   _buildTextField(
@@ -109,7 +103,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'email'.tr(),
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   _buildTextField(
@@ -120,8 +117,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
+                    'phone_number'.tr(),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildTextField(
+                    controller: _phoneController,
+                    hint: '09xxxxxxxx',
+                    icon: Icons.phone_android,
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
                     'password'.tr(),
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   _buildTextField(
@@ -146,7 +161,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   const SizedBox(height: 16),
                   Text(
                     'confirm_password'.tr(),
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   _buildTextField(
@@ -180,7 +198,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               : () {
                                   if (_emailController.text.isNotEmpty &&
                                       _passwordController.text.isNotEmpty &&
-                                      _nameController.text.isNotEmpty) {
+                                      _nameController.text.isNotEmpty &&
+                                      _phoneController.text.isNotEmpty) {
+                                    final phone = _phoneController.text.trim();
+                                    final syrianRegex = RegExp(
+                                      r'^(09|\+9639)[345689][0-9]{7}$',
+                                    );
+
+                                    if (!syrianRegex.hasMatch(phone)) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'الرجاء إدخال رقم هاتف سوري صالح (مثال: 09xxxxxxxx)',
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+
                                     if (_passwordController.text ==
                                         _confirmPasswordController.text) {
                                       context.read<AuthBloc>().add(
@@ -188,6 +225,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           _emailController.text,
                                           _passwordController.text,
                                           _nameController.text,
+                                          phone,
                                         ),
                                       );
                                     } else {

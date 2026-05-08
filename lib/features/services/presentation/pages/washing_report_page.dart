@@ -1,5 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:syria_car_care2/core/widgets/navigatiopn_bar.dart';
 import '../../domain/entities/booking.dart';
+import '../bloc/bookings_bloc.dart';
 
 class WashingReportScreen extends StatefulWidget {
   final Booking? booking;
@@ -32,11 +36,13 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
             Icons.close,
             color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
-          onPressed: () =>
-              Navigator.of(context).popUntil((route) => route.isFirst),
+          onPressed: () {
+            context.read<BookingsBloc>().add(GetMyBookingsEvent());
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          },
         ),
         title: Text(
-          'تقرير العمل',
+          'work_report'.tr(),
           style: TextStyle(
             color: Theme.of(context).textTheme.bodyLarge?.color,
             fontWeight: FontWeight.bold,
@@ -82,7 +88,7 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
               const SizedBox(height: 25),
               // Title
               Text(
-                'تم الانتهاء من غسيل سيارتك بنجاح!',
+                'wash_completed_msg'.tr(),
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -91,29 +97,29 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
-              const Text(
-                'سيارتك الآن جاهزة وبأبهى حلة، تفقد تفاصيل الخدمة أدناه.',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
+              Text(
+                'car_ready_desc'.tr(),
+                style: const TextStyle(color: Colors.grey, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
 
               // Work Images Section
-              _buildSectionHeader(context, 'صور العمل', Icons.image_outlined),
+              _buildSectionHeader(context, 'work_photos'.tr(), Icons.image_outlined),
               const SizedBox(height: 15),
               Row(
                 children: [
                   _buildImageCard(
                     context,
-                    'قبل الغسيل',
-                    'https://images.unsplash.com/photo-1562141989-c5c79ac8f576?q=80&w=500',
+                    'before_wash'.tr(),
+                    'assets/images/onboarding111.jpeg',
                     isBefore: true,
                   ),
                   const SizedBox(width: 15),
                   _buildImageCard(
                     context,
-                    'بعد الغسيل',
-                    'https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?q=80&w=500',
+                    'after_wash'.tr(),
+                    'assets/images/onboarding22.jpeg',
                   ),
                 ],
               ),
@@ -129,16 +135,16 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
                 ),
                 child: Column(
                   children: [
-                    const Text(
-                      'كيف كانت تجربتك؟',
-                      style: TextStyle(
+                    Text(
+                      'how_was_experience'.tr(),
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
-                    const Text(
-                      'رأيك يهمنا لنقدم دائماً الأفضل',
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    Text(
+                      'your_opinion_matters'.tr(),
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
                     ),
                     const SizedBox(height: 15),
                     Row(
@@ -161,11 +167,11 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
                       }),
                     ),
                     const SizedBox(height: 20),
-                    const Align(
+                    Align(
                       alignment: Alignment.centerRight,
                       child: Text(
-                        'أضف تعليقك',
-                        style: TextStyle(
+                        'add_your_comment'.tr(),
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
@@ -177,7 +183,7 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
                       maxLines: 3,
                       textAlign: TextAlign.right,
                       decoration: InputDecoration(
-                        hintText: 'اكتب تجربتك هنا...',
+                        hintText: 'write_experience_here'.tr(),
                         hintStyle: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -208,7 +214,7 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
               const SizedBox(height: 30),
 
               // Payment Summary Section
-              _buildSectionHeader(context, 'ملخص الدفع', Icons.payment),
+              _buildSectionHeader(context, 'payment_summary'.tr(), Icons.payment),
               const SizedBox(height: 15),
               Container(
                 padding: const EdgeInsets.all(20),
@@ -220,21 +226,21 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
                   children: [
                     _buildPaymentRow(
                       context, 
-                      'رقم الطلب', 
+                      'order_number'.tr(), 
                       widget.booking?.id.substring(0, 8).toUpperCase() ?? 'SC-TEMP'
                     ),
                     const Divider(height: 25),
                     _buildPaymentRow(
                       context,
-                      'طريقة الدفع',
-                      'دفع إلكتروني',
+                      'payment_method_label'.tr(),
+                      'electronic_payment'.tr(),
                       isWallet: true,
                     ),
                     const Divider(height: 25),
                     _buildPaymentRow(
                       context, 
-                      'الإجمالي', 
-                      '${widget.booking?.totalPrice.toStringAsFixed(0) ?? '125000'} ل.س', 
+                      'total'.tr(), 
+                      '${widget.booking?.totalPrice.toStringAsFixed(0) ?? '125000'} ${'syrian_pound'.tr()}', 
                       isTotal: true
                     ),
                   ],
@@ -249,8 +255,17 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
                 height: 55,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Here you would normally send the _rating and _commentController.text to backend
-                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('rating_submitted'.tr()),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    context.read<BookingsBloc>().add(GetMyBookingsEvent());
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => const NavigationBarView()),
+                      (route) => false,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
@@ -258,19 +273,19 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'إرسال التقييم',
-                        style: TextStyle(
+                        'submit_rating'.tr(),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
                       ),
                       const SizedBox(width: 10),
-                      Icon(Icons.send, color: Colors.white, size: 20),
+                      const Icon(Icons.send, color: Colors.white, size: 20),
                     ],
                   ),
                 ),
@@ -309,17 +324,24 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
             borderRadius: BorderRadius.circular(15),
             child: Stack(
               children: [
-                Image.network(
-                  imageUrl,
-                  height: 100,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    height: 100,
-                    color: Colors.grey.shade200,
-                    child: const Icon(Icons.broken_image, color: Colors.grey),
-                  ),
-                ),
+                imageUrl.startsWith('assets/')
+                    ? Image.asset(
+                        imageUrl,
+                        height: 100,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      )
+                    : Image.network(
+                        imageUrl,
+                        height: 100,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          height: 100,
+                          color: Colors.grey.shade200,
+                          child: const Icon(Icons.broken_image, color: Colors.grey),
+                        ),
+                      ),
                 if (!isBefore)
                   Positioned(
                     bottom: 5,

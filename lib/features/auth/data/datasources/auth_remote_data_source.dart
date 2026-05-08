@@ -6,6 +6,7 @@ abstract class AuthRemoteDataSource {
     String email,
     String password,
     String name,
+    String phoneNumber,
   );
   Future<UserModel> signInWithEmailPassword(String email, String password);
 }
@@ -20,12 +21,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     String email,
     String password,
     String name,
+    String phoneNumber,
   ) async {
     try {
       final response = await supabaseClient.auth.signUp(
         email: email,
         password: password,
-        data: {'full_name': name},
+        data: {'full_name': name, 'phone_number': phoneNumber},
       );
 
       if (response.user != null) {

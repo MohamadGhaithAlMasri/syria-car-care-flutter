@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
+import '../bloc/bookings_bloc.dart';
 import 'package:latlong2/latlong.dart';
 import '../../../../core/services/map_service.dart';
 import '../../../../core/services/notification_service.dart';
@@ -99,15 +102,15 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
       if (_statusIndex == 1) {
         sl<NotificationService>().showNotification(
           id: 101,
-          title: 'بدأ الغسيل الآن',
-          body: 'فريقنا بدأ العمل على غسيل سيارتك الآن، سيتم إعلامك فور الانتهاء',
+          title: 'washing_started_title'.tr(),
+          body: 'washing_started_body'.tr(),
           payload: 'tracking:$bId',
         );
       } else if (_statusIndex == 2) {
         sl<NotificationService>().showNotification(
           id: 102,
-          title: 'اكتمل الغسيل',
-          body: 'تم الانتهاء من غسيل سيارتك بنجاح! شكراً لاستخدامك سيريا كار كير',
+          title: 'washing_completed_title'.tr(),
+          body: 'washing_completed_body'.tr(),
           payload: 'tracking:$bId',
         );
         _simulationTimer?.cancel();
@@ -209,7 +212,10 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     InkWell(
-                      onTap: () => Navigator.of(context).popUntil((route) => route.isFirst),
+                      onTap: () {
+                        context.read<BookingsBloc>().add(GetMyBookingsEvent());
+                        Navigator.of(context).popUntil((route) => route.isFirst);
+                      },
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
@@ -217,14 +223,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
-                          Icons.arrow_forward_ios,
+                          context.locale.languageCode == 'ar' ? Icons.arrow_forward_ios : Icons.arrow_back_ios,
                           size: 18,
                           color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                     ),
                     Text(
-                      'تتبع مباشر',
+                      'live_tracking'.tr(),
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -282,7 +288,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                             ),
                           ),
                           Text(
-                            'الوصول المتوقع',
+                            'expected_arrival'.tr(),
                             style: TextStyle(color: Colors.grey, fontSize: 12),
                           ),
                         ],
@@ -337,28 +343,28 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                     children: [
                       _buildStatusStep(
                         context,
-                        "اكتمل",
+                        "completed_step".tr(),
                         Icons.verified_outlined,
                         _statusIndex == 2,
                         isDone: _statusIndex > 2,
                       ),
                       _buildStatusStep(
                         context,
-                        "بدأ الغسيل",
+                        "washing_step".tr(),
                         Icons.water_drop_outlined,
                         _statusIndex == 1,
                         isDone: _statusIndex > 1,
                       ),
                       _buildStatusStep(
                         context,
-                        "في الطريق",
+                        "on_the_way_step".tr(),
                         Icons.local_shipping,
                         _statusIndex == 0,
                         isDone: _statusIndex > 0,
                       ),
                       _buildStatusStep(
                         context,
-                        "تم الحجز",
+                        "booked_step".tr(),
                         Icons.check_circle,
                         false,
                         isDone: true,
@@ -396,9 +402,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                               ).textTheme.bodyLarge?.color,
                             ),
                           ),
-                          const Text(
-                            'محترف العناية',
-                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                          Text(
+                            'care_professional'.tr(),
+                            style: const TextStyle(color: Colors.grey, fontSize: 12),
                           ),
                           Row(
                             children: [
@@ -436,14 +442,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                     children: [
                       _buildDetailBox(
                         context,
-                        "رقم الطلب",
+                        "order_number".tr(),
                         widget.booking?.id.substring(0, 8).toUpperCase() ?? "SC-TEMP",
                       ),
                       const SizedBox(width: 15),
                       _buildDetailBox(
                         context,
-                        "الخدمة المطلوبة",
-                        "غسيل VIP كامل",
+                        "requested_service".tr(),
+                        "full_vip_wash".tr(),
                       ),
                     ],
                   ),
@@ -453,6 +459,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                     height: 50,
                     child: OutlinedButton(
                       onPressed: () {
+                        context.read<BookingsBloc>().add(GetMyBookingsEvent());
                         Navigator.of(context).popUntil((route) => route.isFirst);
                       },
                       style: OutlinedButton.styleFrom(
@@ -462,7 +469,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                         ),
                       ),
                       child: Text(
-                        'العودة للرئيسية',
+                        'back_to_home'.tr(),
                         style: TextStyle(
                           color: Theme.of(context).textTheme.bodyLarge?.color,
                           fontWeight: FontWeight.bold,

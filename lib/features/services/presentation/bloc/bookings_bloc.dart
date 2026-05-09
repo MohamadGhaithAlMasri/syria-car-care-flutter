@@ -46,17 +46,20 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
       final result = await cancelBooking(event.bookingId);
       result.fold(
         (failure) => emit(BookingsError(failure.message)),
-        (_) => add(GetMyBookingsEvent()), // Refresh bookings list
+        (_) => add(GetMyBookingsEvent()),
       );
     });
 
     on<UpdateBookingStatusEvent>((event, emit) async {
       final result = await updateBookingStatus(
-        UpdateBookingStatusParams(bookingId: event.bookingId, status: event.status),
+        UpdateBookingStatusParams(
+          bookingId: event.bookingId,
+          status: event.status,
+        ),
       );
       result.fold(
         (failure) => emit(BookingsError(failure.message)),
-        (_) => add(GetMyBookingsEvent()), // Refresh bookings list to update UI
+        (_) => add(GetMyBookingsEvent()),
       );
     });
   }

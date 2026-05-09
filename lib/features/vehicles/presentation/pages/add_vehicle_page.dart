@@ -19,7 +19,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   final _yearController = TextEditingController();
   final _colorController = TextEditingController();
   final _plateController = TextEditingController();
-  
+
   File? _image;
   String? _uploadedImageUrl;
   final _picker = ImagePicker();
@@ -30,10 +30,6 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
       setState(() {
         _image = File(pickedFile.path);
       });
-      // Start upload immediately or wait until "Add" button is pressed?
-      // User said "upload when I pick it" implied by "add the image I upload".
-      // But usually it's better to upload on "Add" button.
-      // Let's upload when "Add" button is pressed for better UX control.
     }
   }
 
@@ -53,7 +49,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
       listener: (context, state) {
         if (state is VehicleImageUploaded) {
           _uploadedImageUrl = state.imageUrl;
-          // After image is uploaded, proceed to add vehicle
+
           final vehicle = Vehicle(
             id: '',
             brand: _brandController.text,
@@ -65,14 +61,14 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
           );
           context.read<VehiclesBloc>().add(AddVehicleEvent(vehicle));
         } else if (state is VehiclesLoaded) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('add_car_success'.tr())),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('add_car_success'.tr())));
           Navigator.pop(context);
         } else if (state is VehiclesError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
         }
       },
       child: Scaffold(
@@ -105,13 +101,19 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                           children: [
                             CircleAvatar(
                               radius: 40,
-                              backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                              backgroundImage: _image != null ? FileImage(_image!) : null,
+                              backgroundColor: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.1),
+                              backgroundImage: _image != null
+                                  ? FileImage(_image!)
+                                  : null,
                               child: _image == null
                                   ? Icon(
                                       Icons.directions_car,
                                       size: 40,
-                                      color: Theme.of(context).colorScheme.primary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                     )
                                   : null,
                             ),
@@ -121,7 +123,9 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                               child: Icon(
                                 Icons.camera_alt,
                                 size: 18,
-                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                                color: Theme.of(
+                                  context,
+                                ).textTheme.bodyLarge?.color,
                               ),
                             ),
                           ],
@@ -224,11 +228,11 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                                 // First upload the image
                                 final bytes = await _image!.readAsBytes();
                                 context.read<VehiclesBloc>().add(
-                                      UploadVehicleImageEvent(
-                                        bytes,
-                                        _image!.path.split('/').last,
-                                      ),
-                                    );
+                                  UploadVehicleImageEvent(
+                                    bytes,
+                                    _image!.path.split('/').last,
+                                  ),
+                                );
                               } else {
                                 // Add without image
                                 final vehicle = Vehicle(
@@ -239,7 +243,9 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                                   color: _colorController.text,
                                   plateNumber: _plateController.text,
                                 );
-                                context.read<VehiclesBloc>().add(AddVehicleEvent(vehicle));
+                                context.read<VehiclesBloc>().add(
+                                  AddVehicleEvent(vehicle),
+                                );
                               }
                             },
                       child: state is VehiclesLoading
@@ -307,7 +313,9 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
             ),
             child: TextField(
               controller: controller,
-              style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+              style: TextStyle(
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
               decoration: InputDecoration(
                 hintText: hint,
                 hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),

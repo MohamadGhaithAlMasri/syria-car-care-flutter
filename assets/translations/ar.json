@@ -262,5 +262,11 @@
   "save": "حفظ",
   "save_as": "حفظ كـ {}",
   "other_loc": "آخر",
-  "location_at": "موقع عند {}, {}"
+  "location_at": "موقع عند {}, {}",
+  "could_not_launch_whatsapp": "تعذر فتح واتساب",
+  "enter_valid_syrian_phone": "الرجاء إدخال رقم هاتف سوري صالح (مثال: 09xxxxxxxx)",
+  "passwords_dont_match": "كلمات المرور غير متطابقة",
+  "please_fill_all_fields": "الرجاء تعبئة كافة الحقول",
+  "please_enter_data": "الرجاء إدخال البيانات",
+  "sentry_error_sent": "تم إرسال الخطأ إلى Sentry بنجاح!"
 }

@@ -253,5 +253,11 @@
   "save": "Save",
   "save_as": "Save as {}",
   "other_loc": "Other",
-  "location_at": "Location at {}, {}"
+  "location_at": "Location at {}, {}",
+  "could_not_launch_whatsapp": "Could not launch WhatsApp",
+  "enter_valid_syrian_phone": "Please enter a valid Syrian phone number (e.g. 09xxxxxxxx)",
+  "passwords_dont_match": "Passwords do not match",
+  "please_fill_all_fields": "Please fill all fields",
+  "please_enter_data": "Please enter data",
+  "sentry_error_sent": "Error sent to Sentry successfully!"
 }

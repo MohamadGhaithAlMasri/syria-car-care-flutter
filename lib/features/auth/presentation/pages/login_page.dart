@@ -163,8 +163,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     );
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('الرجاء إدخال البيانات'),
+                                      SnackBar(
+                                        content: Text('please_enter_data'.tr()),
                                       ),
                                     );
                                   }

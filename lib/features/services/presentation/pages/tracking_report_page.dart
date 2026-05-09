@@ -23,10 +23,10 @@ class LiveTrackingScreen extends StatefulWidget {
 
 class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
   List<LatLng> _routePoints = [];
-  final LatLng _startPoint = const LatLng(33.5138, 36.2765); // ساحة الأمويين
+  final LatLng _startPoint = const LatLng(33.5138, 36.2765);
   late LatLng _endPoint;
   bool _isLoading = true;
-  int _statusIndex = 0; // 0: On the way, 1: Washing started, 2: Completed
+  int _statusIndex = 0;
   Timer? _simulationTimer;
   Booking? _currentBooking;
 
@@ -50,41 +50,43 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     }
 
     final result = await sl<BookingsRepository>().getBookingStatus(bId);
-    result.fold(
-      (failure) => _startSimulation(),
-      (booking) {
-        if (!mounted) return;
-        _currentBooking = booking;
-        int initialIndex = 0;
-        if (booking.status == 'washing') {
-          initialIndex = 1;
-        } else if (booking.status == 'completed') {
-          initialIndex = 2;
-        }
-        
-        setState(() {
-          _statusIndex = initialIndex;
-          _endPoint = LatLng(booking.latitude, booking.longitude);
-        });
+    result.fold((failure) => _startSimulation(), (booking) {
+      if (!mounted) return;
+      _currentBooking = booking;
+      int initialIndex = 0;
+      if (booking.status == 'washing') {
+        initialIndex = 1;
+      } else if (booking.status == 'completed') {
+        initialIndex = 2;
+      }
 
-        if (initialIndex == 2) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => WashingReportScreen(booking: _currentBooking)),
-            );
-          });
-        } else {
-          _startSimulation();
-        }
-      },
-    );
+      setState(() {
+        _statusIndex = initialIndex;
+        _endPoint = LatLng(booking.latitude, booking.longitude);
+      });
+
+      if (initialIndex == 2) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  WashingReportScreen(booking: _currentBooking),
+            ),
+          );
+        });
+      } else {
+        _startSimulation();
+      }
+    });
   }
 
   void _startSimulation() {
-    _simulationTimer = Timer.periodic(const Duration(seconds: 10), (timer) async {
+    _simulationTimer = Timer.periodic(const Duration(seconds: 10), (
+      timer,
+    ) async {
       if (!mounted) return;
-      
+
       final nextStatus = _statusIndex + 1;
       String dbStatus = 'accepted';
       if (nextStatus == 1) dbStatus = 'washing';
@@ -114,10 +116,12 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
           payload: 'tracking:$bId',
         );
         _simulationTimer?.cancel();
-        
+
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => WashingReportScreen(booking: _currentBooking)),
+          MaterialPageRoute(
+            builder: (context) => WashingReportScreen(booking: _currentBooking),
+          ),
         );
       }
     });
@@ -144,7 +148,6 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Map Background
           SizedBox(
             width: double.infinity,
             height: MediaQuery.of(context).size.height * 0.7,
@@ -173,7 +176,6 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                   ),
                 MarkerLayer(
                   markers: [
-                    // Start Point (Umayyad Square)
                     Marker(
                       point: _startPoint,
                       width: 40,
@@ -184,7 +186,6 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                         size: 35,
                       ),
                     ),
-                    // End Point (User Location)
                     Marker(
                       point: _endPoint,
                       width: 40,
@@ -201,7 +202,6 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
             ),
           ),
 
-          // Header
           Positioned(
             top: 50,
             left: 20,
@@ -214,7 +214,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                     InkWell(
                       onTap: () {
                         context.read<BookingsBloc>().add(GetMyBookingsEvent());
-                        Navigator.of(context).popUntil((route) => route.isFirst);
+                        Navigator.of(
+                          context,
+                        ).popUntil((route) => route.isFirst);
                       },
                       child: Container(
                         padding: const EdgeInsets.all(8),
@@ -223,7 +225,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
-                          context.locale.languageCode == 'ar' ? Icons.arrow_forward_ios : Icons.arrow_back_ios,
+                          context.locale.languageCode == 'ar'
+                              ? Icons.arrow_forward_ios
+                              : Icons.arrow_back_ios,
                           size: 18,
                           color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
@@ -268,57 +272,59 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                 ),
                 const SizedBox(height: 20),
                 if (!_isLoading)
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'PM 14:25',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'PM 14:25',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'expected_arrival'.tr(),
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          width: 150,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: FractionallySizedBox(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: 0.6,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.cyan,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
                           ),
-                          Text(
-                            'expected_arrival'.tr(),
-                            style: TextStyle(color: Colors.grey, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        width: 150,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: FractionallySizedBox(
-                          alignment: Alignment.centerLeft,
-                          widthFactor: 0.6,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.cyan,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
           ),
 
-          // Bottom Sheet Information
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -328,12 +334,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(35),
                 ),
-                boxShadow: [
-                   BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 20,
-                  ),
-                ],
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20)],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -379,14 +380,18 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                         Icons.phone,
                         Theme.of(context).colorScheme.primary.withOpacity(0.1),
                         Theme.of(context).textTheme.bodyLarge?.color ??
-                            (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+                            (Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black),
                       ),
                       const SizedBox(width: 10),
                       _buildActionBtn(
                         Icons.chat_bubble_outline,
                         Theme.of(context).colorScheme.primary.withOpacity(0.1),
                         Theme.of(context).textTheme.bodyLarge?.color ??
-                            (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black),
+                            (Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black),
                       ),
                       const Spacer(),
                       Column(
@@ -404,7 +409,10 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                           ),
                           Text(
                             'care_professional'.tr(),
-                            style: const TextStyle(color: Colors.grey, fontSize: 12),
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            ),
                           ),
                           Row(
                             children: [
@@ -443,7 +451,8 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                       _buildDetailBox(
                         context,
                         "order_number".tr(),
-                        widget.booking?.id.substring(0, 8).toUpperCase() ?? "SC-TEMP",
+                        widget.booking?.id.substring(0, 8).toUpperCase() ??
+                            "SC-TEMP",
                       ),
                       const SizedBox(width: 15),
                       _buildDetailBox(
@@ -460,7 +469,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                     child: OutlinedButton(
                       onPressed: () {
                         context.read<BookingsBloc>().add(GetMyBookingsEvent());
-                        Navigator.of(context).popUntil((route) => route.isFirst);
+                        Navigator.of(
+                          context,
+                        ).popUntil((route) => route.isFirst);
                       },
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: Colors.grey.shade300),
@@ -496,7 +507,10 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     Color color = isDone
         ? Colors.cyan
         : (isActive
-              ? (Theme.of(context).textTheme.bodyLarge?.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black))
+              ? (Theme.of(context).textTheme.bodyLarge?.color ??
+                    (Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black))
               : Colors.grey.shade500);
     return Column(
       children: [
@@ -554,4 +568,3 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
     );
   }
 }
-

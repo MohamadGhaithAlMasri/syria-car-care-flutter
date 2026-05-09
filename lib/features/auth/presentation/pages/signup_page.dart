@@ -210,9 +210,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
-                                        const SnackBar(
+                                        SnackBar(
                                           content: Text(
-                                            'الرجاء إدخال رقم هاتف سوري صالح (مثال: 09xxxxxxxx)',
+                                            'enter_valid_syrian_phone'.tr(),
                                           ),
                                         ),
                                       );
@@ -233,18 +233,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
-                                        const SnackBar(
+                                        SnackBar(
                                           content: Text(
-                                            'كلمات المرور غير متطابقة',
+                                            'passwords_dont_match'.tr(),
                                           ),
                                         ),
                                       );
                                     }
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content: Text(
-                                          'الرجاء تعبئة كافة الحقول',
+                                          'please_fill_all_fields'.tr(),
                                         ),
                                       ),
                                     );

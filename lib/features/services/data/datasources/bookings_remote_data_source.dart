@@ -35,10 +35,7 @@ class BookingsRemoteDataSourceImpl implements BookingsRemoteDataSource {
     // 2. Insert booking
     final response = await supabaseClient
         .from('bookings')
-        .insert({
-          ...booking.toJson(),
-          'user_id': user.id, // Ensure user_id is set
-        })
+        .insert({...booking.toJson(), 'user_id': user.id})
         .select()
         .single();
 

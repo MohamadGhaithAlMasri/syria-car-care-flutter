@@ -70,7 +70,6 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              // Success Icon
               Center(
                 child: Container(
                   padding: const EdgeInsets.all(20),
@@ -104,29 +103,31 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
               ),
               const SizedBox(height: 30),
 
-              // Work Images Section
-              _buildSectionHeader(context, 'work_photos'.tr(), Icons.image_outlined),
+              _buildSectionHeader(
+                context,
+                'work_photos'.tr(),
+                Icons.image_outlined,
+              ),
               const SizedBox(height: 15),
               Row(
                 children: [
                   _buildImageCard(
                     context,
                     'before_wash'.tr(),
-                    'assets/images/onboarding111.jpeg',
+                    'assets/images/before.jpg',
                     isBefore: true,
                   ),
                   const SizedBox(width: 15),
                   _buildImageCard(
                     context,
                     'after_wash'.tr(),
-                    'assets/images/onboarding22.jpeg',
+                    'assets/images/after.jpg',
                   ),
                 ],
               ),
 
               const SizedBox(height: 30),
 
-              // Rating Section
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -213,8 +214,11 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
 
               const SizedBox(height: 30),
 
-              // Payment Summary Section
-              _buildSectionHeader(context, 'payment_summary'.tr(), Icons.payment),
+              _buildSectionHeader(
+                context,
+                'payment_summary'.tr(),
+                Icons.payment,
+              ),
               const SizedBox(height: 15),
               Container(
                 padding: const EdgeInsets.all(20),
@@ -225,9 +229,10 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
                 child: Column(
                   children: [
                     _buildPaymentRow(
-                      context, 
-                      'order_number'.tr(), 
-                      widget.booking?.id.substring(0, 8).toUpperCase() ?? 'SC-TEMP'
+                      context,
+                      'order_number'.tr(),
+                      widget.booking?.id.substring(0, 8).toUpperCase() ??
+                          'SC-TEMP',
                     ),
                     const Divider(height: 25),
                     _buildPaymentRow(
@@ -238,10 +243,10 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
                     ),
                     const Divider(height: 25),
                     _buildPaymentRow(
-                      context, 
-                      'total'.tr(), 
-                      '${widget.booking?.totalPrice.toStringAsFixed(0) ?? '125000'} ${'syrian_pound'.tr()}', 
-                      isTotal: true
+                      context,
+                      'total'.tr(),
+                      '${widget.booking?.totalPrice.toStringAsFixed(0) ?? '125000'} ${'syrian_pound'.tr()}',
+                      isTotal: true,
                     ),
                   ],
                 ),
@@ -249,7 +254,6 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
 
               const SizedBox(height: 30),
 
-              // Submit Button
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -263,7 +267,9 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
                     );
                     context.read<BookingsBloc>().add(GetMyBookingsEvent());
                     Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => const NavigationBarView()),
+                      MaterialPageRoute(
+                        builder: (context) => const NavigationBarView(),
+                      ),
                       (route) => false,
                     );
                   },
@@ -297,7 +303,11 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title,
+    IconData icon,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -339,7 +349,10 @@ class _WashingReportScreenState extends State<WashingReportScreen> {
                         errorBuilder: (context, error, stackTrace) => Container(
                           height: 100,
                           color: Colors.grey.shade200,
-                          child: const Icon(Icons.broken_image, color: Colors.grey),
+                          child: const Icon(
+                            Icons.broken_image,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                 if (!isBefore)

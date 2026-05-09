@@ -204,7 +204,7 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                                       style: TextStyle(
                                         fontSize: 10,
                                         color: isSelected
-                                            ? Colors.cyanAccent
+                                            ? Colors.white.withOpacity(0.9)
                                             : Colors.grey,
                                       ),
                                     ),
@@ -244,12 +244,12 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? Colors.cyanAccent
+                                    ? Theme.of(context).primaryColor
                                     : Theme.of(context).cardColor,
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
                                   color: isSelected
-                                      ? Colors.cyan
+                                      ? Theme.of(context).primaryColor
                                       : Colors.grey.shade100,
                                 ),
                               ),
@@ -260,10 +260,7 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                   color: isSelected
-                                      ? (Theme.of(context).brightness ==
-                                                Brightness.dark
-                                            ? Colors.black
-                                            : Theme.of(context).primaryColor)
+                                      ? Colors.white
                                       : (Theme.of(context).brightness ==
                                                 Brightness.dark
                                             ? Colors.grey.shade400
@@ -278,17 +275,17 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
                       Container(
                         padding: const EdgeInsets.all(25),
                         decoration: BoxDecoration(
-                          color: Colors.cyan.withOpacity(0.1),
+                          color: Theme.of(context).primaryColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: Colors.cyan.withOpacity(0.3),
+                            color: Theme.of(context).primaryColor.withOpacity(0.3),
                           ),
                         ),
                         child: Column(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.bolt,
-                              color: Colors.cyan,
+                              color: Theme.of(context).primaryColor,
                               size: 40,
                             ),
                             const SizedBox(height: 15),
@@ -353,7 +350,7 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
           children: [
             Icon(
               icon,
-              color: isSelected ? Colors.cyanAccent : Colors.grey,
+              color: isSelected ? Colors.white : Colors.grey,
               size: 30,
             ),
             const SizedBox(height: 10),
@@ -396,19 +393,15 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
       children: [
         CircleAvatar(
           radius: 14,
-          backgroundColor: isDone
-              ? Colors.cyanAccent
-              : (isActive
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey.shade300),
+          backgroundColor: (isDone || isActive)
+              ? Theme.of(context).primaryColor
+              : Colors.grey.shade300,
           child: Text(
             label,
             style: TextStyle(
-              color: (isDone || !isActive)
-                  ? Colors.black87
-                  : (Theme.of(context).brightness == Brightness.dark
-                        ? Colors.black
-                        : Colors.white),
+              color: (isDone || isActive)
+                  ? Colors.white
+                  : Colors.black87,
               fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
@@ -432,7 +425,7 @@ class _ScheduleBookingScreenState extends State<ScheduleBookingScreen> {
     return Container(
       width: 40,
       height: 2,
-      color: isActive ? Colors.cyanAccent : Colors.grey.shade300,
+      color: isActive ? Theme.of(context).primaryColor : Colors.grey.shade300,
       margin: const EdgeInsets.only(bottom: 18),
     );
   }

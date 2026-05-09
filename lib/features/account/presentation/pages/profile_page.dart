@@ -66,7 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Could not launch WhatsApp")),
+            SnackBar(content: Text('could_not_launch_whatsapp'.tr())),
           );
         }
       }
@@ -391,7 +391,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     await Sentry.captureException(e, stackTrace: stackTrace);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('تم إرسال الخطأ إلى Sentry بنجاح!')),
+                        SnackBar(content: Text('sentry_error_sent'.tr())),
                       );
                     }
                   }

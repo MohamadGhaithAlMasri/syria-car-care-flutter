@@ -36,10 +36,7 @@ class _GarageScreenState extends State<GarageScreen> {
           title: Text('app_name'.tr()),
           centerTitle: true,
           actions: const [
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: ProfileAvatar(),
-            ),
+            Padding(padding: EdgeInsets.all(8.0), child: ProfileAvatar()),
           ],
         ),
         body: Padding(
@@ -99,7 +96,8 @@ class _GarageScreenState extends State<GarageScreen> {
                           return _buildCarCard(
                             context,
                             vehicle,
-                            vehicle.imageUrl ?? "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1000",
+                            vehicle.imageUrl ??
+                                "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1000",
                           );
                         },
                       );

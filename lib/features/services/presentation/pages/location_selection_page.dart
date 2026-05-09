@@ -28,9 +28,24 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
   List<dynamic> _searchResults = [];
   bool _isSearching = false;
 
+  final DraggableScrollableController _draggableController =
+      DraggableScrollableController();
+  double _sheetSize = 0.4;
+
+  @override
+  void initState() {
+    super.initState();
+    _draggableController.addListener(() {
+      setState(() {
+        _sheetSize = _draggableController.size;
+      });
+    });
+  }
+
   @override
   void dispose() {
     _searchController.dispose();
+    _draggableController.dispose();
     super.dispose();
   }
 
@@ -82,6 +97,9 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final fabBottom = (screenHeight * _sheetSize) + 10;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -235,7 +253,7 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
             ),
           ),
           Positioned(
-            bottom: 300,
+            bottom: fabBottom,
             right: 20,
             child: FloatingActionButton(
               heroTag: 'my_location',
@@ -247,155 +265,171 @@ class _LocationSelectionScreenState extends State<LocationSelectionScreen> {
               ),
             ),
           ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              padding: const EdgeInsets.all(25),
-              decoration: BoxDecoration(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(35),
+          DraggableScrollableSheet(
+            controller: _draggableController,
+            initialChildSize: 0.435,
+            minChildSize: 0.15,
+            maxChildSize: 0.44,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(35),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.transparent
+                          : Colors.black12,
+                      blurRadius: 20,
+                    ),
+                  ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.transparent
-                        : Colors.black12,
-                    blurRadius: 20,
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Saved locations",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(25),
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 50,
+                        height: 5,
+                        margin: const EdgeInsets.only(bottom: 15),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[400],
+                          borderRadius: BorderRadius.circular(2.5),
+                        ),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 15),
-                  BlocBuilder<AccountBloc, AccountState>(
-                    builder: (context, state) {
-                      final List<UserAddress> addresses = state is AccountLoaded
-                          ? state.addresses
-                          : [];
-
-                      final home = addresses.cast<UserAddress?>().firstWhere(
-                        (a) => a?.type == 'home',
-                        orElse: () => null,
-                      );
-                      final work = addresses.cast<UserAddress?>().firstWhere(
-                        (a) => a?.type == 'work',
-                        orElse: () => null,
-                      );
-                      final parents = addresses.cast<UserAddress?>().firstWhere(
-                        (a) => a?.type == 'parents',
-                        orElse: () => null,
-                      );
-
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildSavedLocation(
-                            "home_loc".tr(),
-                            Icons.home,
-                            context,
-                            home,
-                          ),
-                          _buildSavedLocation(
-                            "work_loc".tr(),
-                            Icons.work,
-                            context,
-                            work,
-                          ),
-                          _buildSavedLocation(
-                            "parents_loc".tr(),
-                            Icons.people,
-                            context,
-                            parents,
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 25),
-                  const Text(
-                    'تفاصيل إضافية',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: TextField(
+                    Text(
+                      "Saved locations",
                       style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                         color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
-                      decoration: InputDecoration(
-                        hintText: 'location_hint'.tr(),
-                        border: InputBorder.none,
-                        hintStyle: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(
-                            context,
-                          ).textTheme.bodySmall?.color?.withOpacity(0.4),
-                        ),
-                      ),
                     ),
-                  ),
-                  const SizedBox(height: 25),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ServiceMenuScreen(
-                              vehicleId: widget.vehicleId,
-                              latitude: _center.latitude,
-                              longitude: _center.longitude,
+                    const SizedBox(height: 15),
+                    BlocBuilder<AccountBloc, AccountState>(
+                      builder: (context, state) {
+                        final List<UserAddress> addresses =
+                            state is AccountLoaded ? state.addresses : [];
+
+                        final home = addresses.cast<UserAddress?>().firstWhere(
+                          (a) => a?.type == 'home',
+                          orElse: () => null,
+                        );
+                        final work = addresses.cast<UserAddress?>().firstWhere(
+                          (a) => a?.type == 'work',
+                          orElse: () => null,
+                        );
+                        final parents = addresses
+                            .cast<UserAddress?>()
+                            .firstWhere(
+                              (a) => a?.type == 'parents',
+                              orElse: () => null,
+                            );
+
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            _buildSavedLocation(
+                              "home_loc".tr(),
+                              Icons.home,
+                              context,
+                              home,
                             ),
-                          ),
+                            _buildSavedLocation(
+                              "work_loc".tr(),
+                              Icons.work,
+                              context,
+                              work,
+                            ),
+                            _buildSavedLocation(
+                              "parents_loc".tr(),
+                              Icons.people,
+                              context,
+                              parents,
+                            ),
+                          ],
                         );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1B3B5A),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
+                    ),
+                    const SizedBox(height: 25),
+                    const Text(
+                      'تفاصيل إضافية',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: TextField(
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: 'location_hint'.tr(),
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.color?.withOpacity(0.4),
+                          ),
                         ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            color: Colors.cyanAccent,
-                            size: 20,
-                          ),
-                          SizedBox(width: 10),
-                          Text(
-                            'confirm_location'.tr(),
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                    ),
+                    const SizedBox(height: 25),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ServiceMenuScreen(
+                                vehicleId: widget.vehicleId,
+                                latitude: _center.latitude,
+                                longitude: _center.longitude,
+                              ),
                             ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1B3B5A),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
                           ),
-                        ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              color: Colors.cyanAccent,
+                              size: 20,
+                            ),
+                            SizedBox(width: 10),
+                            Text(
+                              'confirm_location'.tr(),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),

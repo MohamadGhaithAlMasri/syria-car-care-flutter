@@ -14,7 +14,6 @@ class PaymentMethodCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -27,13 +26,21 @@ class PaymentMethodCard extends StatelessWidget {
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             child: icon is IconData
                 ? Icon(icon, color: Theme.of(context).primaryColor)
-                : Image.network(icon as String, width: 20),
+                : (icon as String).startsWith('http')
+                ? Image.network(icon as String, width: 20)
+                : Image.asset(icon as String, fit: BoxFit.fill),
           ),
           const SizedBox(width: 15),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).textTheme.bodyLarge?.color)),
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
+                ),
+              ),
               Text(
                 subtitle,
                 style: const TextStyle(color: Colors.grey, fontSize: 12),

@@ -45,42 +45,47 @@ class TransactionsPage extends StatelessWidget {
               ? state.transactions
               : <WalletTransaction>[];
 
-          if (transactions.isEmpty) {
-            return Center(child: Text('no_transactions'.tr()));
-          }
-
           return RefreshIndicator(
             onRefresh: () async {
               context.read<AccountBloc>().add(GetTransactionsEvent());
             },
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              itemCount: transactions.length,
-              itemBuilder: (context, index) {
-                final tx = transactions[index];
-                return TransactionItem(
-                  title: tx.title,
-                  date: DateFormat('dd/MM/yyyy HH:mm').format(tx.date),
-                  amount:
-                      "${(tx.type == TransactionType.recharge || tx.type == TransactionType.refund) ? '+' : '-'} ${tx.amount.abs().toStringAsFixed(0)} ${'syrian_pound'.tr()}",
-                  amountColor: (tx.type == TransactionType.recharge || tx.type == TransactionType.refund)
-                      ? Colors.green
-                      : Colors.red,
-                  borderColor: (tx.type == TransactionType.recharge || tx.type == TransactionType.refund)
-                      ? Colors.green.withOpacity(0.3)
-                      : Colors.red.withOpacity(0.3),
-                  icon: tx.type == TransactionType.recharge
-                      ? Icons.add_card
-                      : tx.type == TransactionType.refund
-                          ? Icons.history_rounded
-                          : tx.type == TransactionType.subscription
-                              ? Icons.card_membership
-                              : tx.type == TransactionType.booking
-                                  ? Icons.local_car_wash
-                                  : Icons.payment,
-                );
-              },
-            ),
+            child: transactions.isEmpty
+                ? ListView(
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.8,
+                        child: Center(child: Text('no_transactions'.tr())),
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    itemCount: transactions.length,
+                    itemBuilder: (context, index) {
+                      final tx = transactions[index];
+                      return TransactionItem(
+                        title: tx.title,
+                        date: DateFormat('dd/MM/yyyy HH:mm').format(tx.date),
+                        amount:
+                            "${(tx.type == TransactionType.recharge || tx.type == TransactionType.refund) ? '+' : '-'} ${tx.amount.abs().toStringAsFixed(0)} ${'syrian_pound'.tr()}",
+                        amountColor: (tx.type == TransactionType.recharge || tx.type == TransactionType.refund)
+                            ? Colors.green
+                            : Colors.red,
+                        borderColor: (tx.type == TransactionType.recharge || tx.type == TransactionType.refund)
+                            ? Colors.green.withOpacity(0.3)
+                            : Colors.red.withOpacity(0.3),
+                        icon: tx.type == TransactionType.recharge
+                            ? Icons.add_card
+                            : tx.type == TransactionType.refund
+                                ? Icons.history_rounded
+                                : tx.type == TransactionType.subscription
+                                    ? Icons.card_membership
+                                    : tx.type == TransactionType.booking
+                                        ? Icons.local_car_wash
+                                        : Icons.payment,
+                      );
+                    },
+                  ),
           );
         },
       ),

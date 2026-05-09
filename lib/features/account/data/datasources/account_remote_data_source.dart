@@ -128,9 +128,9 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     final fileName = '${user.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
     final path = 'avatars/$fileName';
 
-    await supabase.storage.from('avatars').upload(path, file);
+    await supabase.storage.from('550e8400-e29b-41d4-a716-446655440000').upload(path, file);
     
-    final publicUrl = supabase.storage.from('avatars').getPublicUrl(path);
+    final publicUrl = supabase.storage.from('550e8400-e29b-41d4-a716-446655440000').getPublicUrl(path);
 
     await supabase.from('profiles').update({
       'avatar_url': publicUrl,

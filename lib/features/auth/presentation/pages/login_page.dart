@@ -4,8 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syria_car_care2/core/widgets/navigatiopn_bar.dart';
 import '../bloc/auth_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
-
 import 'signup_page.dart';
+import '../widgets/custom_text_field.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -60,8 +61,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Center(
                     child: Image.asset(
                       'assets/images/logo7.png',
-                      width: 120,
-                      height: 120,
+                      width: 120.w,
+                      height: 120.w,
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -76,10 +77,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const Center(
+                  Center(
                     child: Text(
-                      'أدخل بياناتك للبدء فوراً',
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                      'enter_details_to_start'.tr(),
+                      style: const TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -92,20 +93,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  TextField(
+                  CustomTextField(
                     controller: _emailController,
+                    hint: 'example@email.com',
+                    icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-                    decoration: const InputDecoration(
-                      hintText: 'example@email.com',
-                      prefixIcon: Icon(
-                        Icons.email_outlined,
-                        color: Colors.grey,
-                      ),
-                      contentPadding: EdgeInsets.symmetric(vertical: 15),
-                    ),
+                    textAlign: TextAlign.start,
                   ),
                   const SizedBox(height: 20),
 
@@ -117,33 +110,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  TextField(
+                  CustomTextField(
                     controller: _passwordController,
+                    hint: '••••••••',
+                    icon: Icons.lock_outline,
                     obscureText: _obscurePassword,
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: '••••••••',
-                      prefixIcon: const Icon(
-                        Icons.lock_outline,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                         color: Colors.grey,
                       ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          color: Colors.grey,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
+                    textAlign: TextAlign.start,
                   ),
                   const SizedBox(height: 10),
 

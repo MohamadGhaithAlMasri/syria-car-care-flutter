@@ -23,6 +23,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
   final UploadAvatar uploadAvatar;
   final GetAddresses getAddresses;
   final SaveAddress saveAddress;
+  bool _isFetchingTransactions = false;
 
   AccountBloc({
     required this.getAccountInfo,
@@ -75,10 +76,13 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     GetTransactionsEvent event,
     Emitter<AccountState> emit,
   ) async {
-    // If already loaded, we might just want to refresh transactions
+    if (_isFetchingTransactions) return;
+    
     final currentState = state;
     if (currentState is AccountLoaded) {
+      _isFetchingTransactions = true;
       final result = await getTransactions();
+      _isFetchingTransactions = false;
       result.fold(
         (failure) => emit(AccountError(failure.message)),
         (transactions) => emit(
@@ -124,9 +128,6 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     UploadAvatarEvent event,
     Emitter<AccountState> emit,
   ) async {
-    // We don't want to show a full loading screen for avatar upload
-    // But we need some way to show progress.
-    // For now, let's just use the current state if it's loaded.
     final currentState = state;
     if (currentState is AccountLoaded) {
       final result = await uploadAvatar(event.filePath);

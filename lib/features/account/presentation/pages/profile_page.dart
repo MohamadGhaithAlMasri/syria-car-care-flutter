@@ -15,6 +15,7 @@ import '../widgets/language_toggle.dart';
 import '../widgets/theme_toggle.dart';
 import '../widgets/section_title.dart';
 import '../widgets/profile_avatar.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'saved_addresses_page.dart';
 
 import '../bloc/account_bloc.dart';
@@ -96,9 +97,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
+      body: BlocListener<AccountBloc, AccountState>(
+        listener: (context, state) {
+          if (state is AccountError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+          }
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
           children: [
             const SizedBox(height: 10),
             Center(
@@ -370,10 +379,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 15),
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: ElevatedButton(
+                onPressed: () async {
+                  try {
+                    throw StateError('This is test exception');
+                  } catch (e, stackTrace) {
+                    await Sentry.captureException(e, stackTrace: stackTrace);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('تم إرسال الخطأ إلى Sentry بنجاح!')),
+                      );
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey.shade200,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                child: const Text(
+                  'Verify Sentry Setup',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 30),
           ],
         ),
       ),
+    ),
     );
   }
 }

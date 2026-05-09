@@ -41,7 +41,7 @@ class ThemeToggle extends StatelessWidget {
           Text(
             Theme.of(context).brightness == Brightness.dark
                 ? "Dark Theme"
-                : "Light Theme", // Using text directly since 'theme' tr might not exist yet
+                : "Light Theme",
             style: TextStyle(
               fontWeight: FontWeight.w500,
               color: Theme.of(context).textTheme.bodyLarge?.color,

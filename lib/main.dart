@@ -14,6 +14,8 @@ import 'package:syria_car_care2/features/services/presentation/bloc/bookings_blo
 import 'package:syria_car_care2/core/theme/theme_bloc.dart';
 import 'package:syria_car_care2/core/theme/app_theme.dart';
 import 'package:syria_car_care2/core/services/notification_service.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -31,13 +33,34 @@ void main() async {
   await di.sl<NotificationService>().init();
   await di.sl<NotificationService>().requestPermissions();
 
-  runApp(
-    EasyLocalization(
-      supportedLocales: const [Locale('en'), Locale('ar')],
-      path: 'assets/translations',
-      fallbackLocale: const Locale('ar'),
-      startLocale: const Locale('ar'),
-      child: const MyApp(),
+  await SentryFlutter.init(
+    (options) {
+      options.dsn =
+          'https://9c0cfd97b4e0e0f1aa311edbe42ddf95@o4511353464815616.ingest.de.sentry.io/4511353466519632';
+      // Set tracesSampleRate to 1.0 to capture 100% of transactions for tracing.
+      // We recommend adjusting this value in production.
+      options.tracesSampleRate = 1.0;
+      // The sampling rate for profiling is relative to tracesSampleRate
+      // Setting to 1.0 will profile 100% of sampled transactions:
+      options.profilesSampleRate = 1.0;
+    },
+    appRunner: () => runApp(
+      SentryWidget(
+        child: EasyLocalization(
+          supportedLocales: const [Locale('en'), Locale('ar')],
+          path: 'assets/translations',
+          fallbackLocale: const Locale('ar'),
+          startLocale: const Locale('ar'),
+          child: ScreenUtilInit(
+            designSize: const Size(360, 690),
+            minTextAdapt: true,
+            splitScreenMode: true,
+            builder: (context, child) {
+              return const MyApp();
+            },
+          ),
+        ),
+      ),
     ),
   );
 }

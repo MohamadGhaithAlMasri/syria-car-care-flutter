@@ -13,6 +13,8 @@ import 'package:syria_car_care2/features/services/presentation/pages/schedule_pa
 import 'package:syria_car_care2/features/vehicles/presentation/bloc/vehicles_bloc.dart';
 import 'package:syria_car_care2/features/services/presentation/pages/tracking_report_page.dart';
 import 'package:syria_car_care2/features/account/presentation/widgets/profile_avatar.dart';
+import '../widgets/subscription_card.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -192,120 +194,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   planName = state.accountInfo.plan!;
                 }
 
-                return Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: hasPlan
-                        ? Theme.of(context).colorScheme.secondary
-                        : Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(25),
-                    border: Border.all(
-                      color:
-                          Theme.of(
-                            context,
-                          ).floatingActionButtonTheme.backgroundColor ??
-                          Theme.of(context).colorScheme.primary,
-                      width: 1.5,
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'current_subscription'.tr(),
-                                style: TextStyle(
-                                  color: hasPlan
-                                      ? Colors.cyanAccent
-                                      : Colors.grey,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              Text(
-                                planName,
-                                style: TextStyle(
-                                  color: hasPlan
-                                      ? Colors.white
-                                      : Theme.of(
-                                          context,
-                                        ).textTheme.bodyLarge?.color,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: hasPlan
-                                  ? Colors.white10
-                                  : Colors.red.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              hasPlan ? 'active'.tr() : 'not_subscribed'.tr(),
-                              style: TextStyle(
-                                color: hasPlan ? Colors.cyanAccent : Colors.red,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
+                return SubscriptionCard(
+                  hasPlan: hasPlan,
+                  planName: planName,
+                  onUpgradeOrSubscribe: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const SubscriptionPlansScreen(),
                       ),
-                      const SizedBox(height: 15),
-                      LinearProgressIndicator(
-                        value: hasPlan ? 0.6 : 0.0,
-                        backgroundColor: hasPlan
-                            ? Colors.white10
-                            : Colors.grey.withOpacity(0.1),
-                        color: hasPlan ? Colors.cyanAccent : Colors.grey,
-                        minHeight: 8,
-                      ),
-                      const SizedBox(height: 15),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const SubscriptionPlansScreen(),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: hasPlan
-                                ? Colors.cyan
-                                : Theme.of(context).primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            hasPlan
-                                ? 'upgrade_package'.tr()
-                                : 'subscribe_now'.tr(),
-                            style: TextStyle(
-                              color: hasPlan
-                                  ? const Color(0xFF1B3B5A)
-                                  : Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 );
               },
             ),
@@ -489,36 +389,54 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(25),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).primaryColor.withAlpha(200),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  gradient: Theme.of(context).brightness == Brightness.dark
+                      ? LinearGradient(
+                          colors: [
+                            Theme.of(context).primaryColor.withOpacity(0.2),
+                            Theme.of(context).primaryColor.withOpacity(0.1),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        )
+                      : LinearGradient(
+                          colors: [
+                            Theme.of(context).primaryColor,
+                            Theme.of(context).primaryColor.withAlpha(200),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
                   borderRadius: BorderRadius.circular(25),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context).primaryColor.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
+                  border: Theme.of(context).brightness == Brightness.dark
+                      ? Border.all(color: Theme.of(context).primaryColor.withOpacity(0.5))
+                      : null,
+                  boxShadow: Theme.of(context).brightness == Brightness.dark
+                      ? []
+                      : [
+                          BoxShadow(
+                            color: Theme.of(context).primaryColor.withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.water_drop_rounded,
-                      color: Colors.white,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.cyan
+                          : Colors.white,
                       size: 35,
                     ),
                     const SizedBox(width: 15),
                     Text(
                       "wash_now".tr(),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.cyan
+                            : Colors.white,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),

@@ -5,6 +5,7 @@ import 'package:syria_car_care2/core/widgets/navigatiopn_bar.dart';
 import '../bloc/auth_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'login_page.dart';
+import '../widgets/custom_text_field.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -55,7 +56,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       child: Scaffold(
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,7 +96,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildTextField(
+                  CustomTextField(
                     controller: _nameController,
                     hint: 'أدخل اسمك الكامل',
                     icon: Icons.person_outline,
@@ -109,7 +110,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildTextField(
+                  CustomTextField(
                     controller: _emailController,
                     hint: 'example@email.com',
                     icon: Icons.email_outlined,
@@ -124,7 +125,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildTextField(
+                  CustomTextField(
                     controller: _phoneController,
                     hint: '09xxxxxxxx',
                     icon: Icons.phone_android,
@@ -139,7 +140,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildTextField(
+                  CustomTextField(
                     controller: _passwordController,
                     hint: '••••••••',
                     icon: Icons.lock_outline,
@@ -167,7 +168,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildTextField(
+                  CustomTextField(
                     controller: _confirmPasswordController,
                     hint: '••••••••',
                     icon: Icons.lock_outline,
@@ -297,29 +298,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hint,
-    required IconData icon,
-    TextInputType keyboardType = TextInputType.text,
-    bool obscureText = false,
-    Widget? suffixIcon,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      textAlign: TextAlign.right,
-      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
-      decoration: InputDecoration(
-        hintText: hint,
-        prefixIcon: Icon(icon, color: Colors.grey),
-        suffixIcon: suffixIcon,
-        contentPadding: const EdgeInsets.symmetric(vertical: 15),
       ),
     );
   }

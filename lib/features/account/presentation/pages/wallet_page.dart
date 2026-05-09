@@ -243,8 +243,7 @@ class _WalletPaymentsScreenState extends State<WalletPaymentsScreen> {
                           child: PaymentMethodCard(
                             title: "syriatel_cash".tr(),
                             subtitle: "syriatel_cash_subtitle".tr(),
-                            icon:
-                                "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1000",
+                            icon: "assets/images/syriatel.jpg",
                           ),
                         ),
                         const SizedBox(height: 10),

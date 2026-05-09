@@ -34,7 +34,10 @@ class _AddressPickerScreenState extends State<AddressPickerScreen> {
   void initState() {
     super.initState();
     if (widget.initialAddress != null) {
-      _center = LatLng(widget.initialAddress!.latitude, widget.initialAddress!.longitude);
+      _center = LatLng(
+        widget.initialAddress!.latitude,
+        widget.initialAddress!.longitude,
+      );
       _searchController.text = widget.initialAddress!.addressName;
     } else {
       _getCurrentLocation();
@@ -203,14 +206,19 @@ class _AddressPickerScreenState extends State<AddressPickerScreen> {
               padding: const EdgeInsets.all(25),
               decoration: BoxDecoration(
                 color: Theme.of(context).scaffoldBackgroundColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(35),
+                ),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     'save_as'.tr(args: [widget.type.tr()]),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   SizedBox(
@@ -224,21 +232,33 @@ class _AddressPickerScreenState extends State<AddressPickerScreen> {
                           type: widget.type,
                           latitude: _center.latitude,
                           longitude: _center.longitude,
-                          addressName: _searchController.text.isNotEmpty 
-                              ? _searchController.text 
-                              : 'location_at'.tr(args: [
-                                  _center.latitude.toStringAsFixed(4),
-                                  _center.longitude.toStringAsFixed(4)
-                                ]),
+                          addressName: _searchController.text.isNotEmpty
+                              ? _searchController.text
+                              : 'location_at'.tr(
+                                  args: [
+                                    _center.latitude.toStringAsFixed(4),
+                                    _center.longitude.toStringAsFixed(4),
+                                  ],
+                                ),
                         );
-                        context.read<AccountBloc>().add(SaveAddressEvent(address));
+                        context.read<AccountBloc>().add(
+                          SaveAddressEvent(address),
+                        );
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1B3B5A),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
                       ),
-                      child: Text('save'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      child: Text(
+                        'save'.tr(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],

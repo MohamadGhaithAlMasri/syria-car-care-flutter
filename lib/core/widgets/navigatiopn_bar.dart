@@ -24,7 +24,6 @@ class _NavigationBarViewState extends State<NavigationBarView> {
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
   }
 

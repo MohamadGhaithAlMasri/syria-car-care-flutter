@@ -19,7 +19,7 @@ class BalanceSubCard extends StatelessWidget {
           Text(
             title,
             maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            overflow: TextOverflow.fade,
             style: const TextStyle(color: Colors.white70, fontSize: 12),
           ),
           Text(

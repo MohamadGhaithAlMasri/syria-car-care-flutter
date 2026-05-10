@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syria_car_care2/features/auth/presentation/pages/login_page.dart';
 import '../widgets/benefit_card.dart';
 import '../widgets/info_card.dart';
@@ -17,7 +18,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int _currentIndex = 0;
 
-  void _goToLogin() {
+  Future<void> _goToLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('hasCompletedOnboarding', true);
+    
+    if (!mounted) return;
+    
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const LoginScreen()),

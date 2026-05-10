@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:syria_car_care2/core/widgets/navigatiopn_bar.dart';
 import 'package:syria_car_care2/features/onboarding/presentation/pages/onboarding_page.dart';
+import 'package:syria_car_care2/features/auth/presentation/pages/login_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -30,11 +31,17 @@ class _SplashScreenState extends State<SplashScreen> {
 
     final prefs = await SharedPreferences.getInstance();
     final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    final hasCompletedOnboarding = prefs.getBool('hasCompletedOnboarding') ?? false;
 
     if (session != null || isLoggedIn) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const NavigationBarView()),
+      );
+    } else if (hasCompletedOnboarding) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
     } else {
       Navigator.pushReplacement(
